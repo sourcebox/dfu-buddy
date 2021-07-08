@@ -1,0 +1,29 @@
+[package]
+name = "dfu-buddy"
+version = "0.1.0"
+authors = ["Oliver Rockstedt <info@sourcebox.de>"]
+edition = "2018"
+description = "DFU flash utility with GUI"
+repository = "https://github.com/sourcebox/dfu-buddy"
+license = "MIT"
+
+[dependencies]
+#dfufile = { path = "../dfufile" }
+dfufile = { git = "https://github.com/sourcebox/dfufile-rs", rev = "356184f17f380cdbad4cedff460e4cc8bc612771"}
+#eframe = "0.13"
+eframe = { git = "https://github.com/emilk/egui", rev = "faf104220be18cda878e9864bab3760caa4901d8", features=["persistence"]}
+log = "0.4"
+simple_logger = "1.11"
+serde = { version = "1", features = ["derive"], optional = true }
+rusb = "0.8"
+rfd = "0.4"
+dirs = "3.0"
+futures = "0.3"
+regex = "1.5"
+
+[features]
+default = ["persistence"]
+persistence = ["eframe/persistence", "serde"]
+
+[profile.release]
+lto = true

@@ -1,0 +1,931 @@
+mod dfudev;
+mod ui;
+
+use eframe::{egui, epi};
+use simple_logger::SimpleLogger;
+
+use ui::{device, file};
+
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
+////////////////////////////////////////////////////////////////////////////////
+
+/// Starts the application
+fn main() -> Result<()> {
+    SimpleLogger::new()
+        .with_level(log::LevelFilter::Debug)
+        .init()
+        .unwrap();
+
+    let app = App::default();
+    let native_options = eframe::NativeOptions {
+        initial_window_size: Some(egui::vec2(750.0, 500.0)),
+        resizable: false,
+        ..eframe::NativeOptions::default()
+    };
+    eframe::run_native(Box::new(app), native_options);
+}
+
+/// Executes a future in a new thread
+fn execute<F: std::future::Future<Output = ()> + Send + 'static>(f: F) {
+    std::thread::spawn(move || {
+        futures::executor::block_on(f);
+    });
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+#[cfg_attr(feature = "persistence", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(feature = "persistence", serde(default))]
+pub struct App {
+    /// Vector of all availables DFU devices
+    #[cfg_attr(feature = "persistence", serde(skip))]
+    devices: Option<Vec<dfudev::DfuDevice>>,
+
+    /// Id of currently selected DFU device
+    #[cfg_attr(feature = "persistence", serde(skip))]
+    device_id: Option<u64>,
+
+    /// Instance of currently opened DFU file
+    #[cfg_attr(feature = "persistence", serde(skip))]
+    dfu_file: Option<dfufile::DfuFile>,
+
+    /// DFU files checks
+    #[cfg_attr(feature = "persistence", serde(skip))]
+    dfu_file_checks: DfuFileChecks,
+
+    /// Last path shown in the open file dialog
+    file_dialog_path: Option<std::path::PathBuf>,
+
+    /// Message channel
+    #[cfg_attr(feature = "persistence", serde(skip))]
+    message_channel: (
+        std::sync::mpsc::Sender<Message>,
+        std::sync::mpsc::Receiver<Message>,
+    ),
+
+    /// Device update state
+    #[cfg_attr(feature = "persistence", serde(skip))]
+    device_update_state: DeviceUpdateState,
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+/// Messages for application actions
+#[derive(Debug, Clone)]
+pub enum Message {
+    /// Force rescanning of devices
+    RescanDevices,
+
+    /// Select a device with a specific id
+    DeviceSelected(u64),
+
+    /// Clear the selected file
+    ClearFile,
+
+    /// Open a file
+    OpenFile(std::path::PathBuf),
+
+    /// Start the update process in a separate thread
+    StartUpdate,
+
+    /// Send from update task when operation starts
+    DeviceUpdateStarted,
+
+    /// Send from update task when everything is finished
+    DeviceUpdateFinished,
+
+    /// Set a new update step
+    DeviceUpdateStep(DeviceUpdateStep),
+
+    /// Set progress for device erase operation
+    DeviceEraseProgress(f32),
+
+    /// Set progress for device program operation
+    DeviceProgramProgress(f32),
+
+    /// Set progress for device verify operation
+    DeviceVerifyProgress(f32),
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+/// Contains flags for performed checks on the selected DFU file
+#[derive(Default)]
+pub struct DfuFileChecks {
+    /// Flag if a CRC check has been performed
+    crc_checked: bool,
+
+    /// Flag if CRC is valid
+    crc_valid: bool,
+
+    /// Flag if DFU version is accepted for the selected device
+    dfu_version_valid: bool,
+
+    /// Flag if vendor id is accepted for the selected device
+    vendor_id_accepted: bool,
+
+    /// Flag if product id is accepted for the selected device
+    product_id_accepted: bool,
+
+    /// Flag if all targets are valid
+    targets_valid: bool,
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+/// State of the device update operations
+#[derive(Default)]
+pub struct DeviceUpdateState {
+    /// Flag if everything is ready to start
+    preflight_checks_passed: bool,
+
+    /// Confirmation flag set by user checkbox
+    confirmed: bool,
+
+    /// Update in progress
+    running: bool,
+
+    /// Current step
+    step: Option<DeviceUpdateStep>,
+
+    /// Erase operation progress 0..1 for 0..100%
+    erase_progress: f32,
+
+    /// Program operation progress 0..1 for 0..100%
+    program_progress: f32,
+
+    /// Verify operation progress 0..1 for 0..100%
+    verify_progress: f32,
+}
+
+/// Current step of update procedure
+#[derive(PartialEq, Debug, Clone, Copy)]
+pub enum DeviceUpdateStep {
+    /// Erase operation in progress
+    Erase,
+
+    /// Program operation in progress
+    Program,
+
+    /// Verify operation in progress
+    Verify,
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+impl Default for App {
+    fn default() -> Self {
+        Self {
+            devices: None,
+            device_id: None,
+            dfu_file: None,
+            file_dialog_path: None,
+            dfu_file_checks: DfuFileChecks::default(),
+            message_channel: std::sync::mpsc::channel(),
+            device_update_state: DeviceUpdateState::default(),
+        }
+    }
+}
+
+impl epi::App for App {
+    fn name(&self) -> &str {
+        "DFU Buddy"
+    }
+
+    /// Called by the frame work to save state before shutdown
+    #[cfg(feature = "persistence")]
+    fn save(&mut self, storage: &mut dyn epi::Storage) {
+        epi::set_value(storage, epi::APP_KEY, self);
+    }
+
+    /// Called once on startup
+    fn setup(
+        &mut self,
+        ctx: &egui::CtxRef,
+        _frame: &mut epi::Frame<'_>,
+        storage: Option<&dyn epi::Storage>,
+    ) {
+        if let Some(storage) = storage {
+            *self = epi::get_value(storage, epi::APP_KEY).unwrap_or_default()
+        }
+
+        let mut fonts = egui::FontDefinitions::default();
+        fonts.family_and_size.insert(
+            egui::TextStyle::Heading,
+            (egui::FontFamily::Proportional, 16.0),
+        );
+        ctx.set_fonts(fonts);
+
+        log::info!("USB hotplug: {}", dfudev::has_hotplug());
+        self.scan_devices();
+
+        let mut args = std::env::args();
+
+        if args.len() > 1 {
+            // First CLI argument is used as file path
+            let file_path = std::path::PathBuf::from(args.nth(1).unwrap());
+            self.message_channel
+                .0
+                .send(Message::OpenFile(file_path))
+                .ok();
+        }
+    }
+
+    /// Called each time the UI needs repainting, which may be many times per second.
+    fn update(&mut self, ctx: &egui::CtxRef, frame: &mut epi::Frame<'_>) {
+        // Continuous run mode is required for message processing
+        ctx.request_repaint();
+
+        loop {
+            match self.message_channel.1.try_recv() {
+                Ok(message) => {
+                    self.process_message(&message);
+                }
+                Err(_) => {
+                    break;
+                }
+            }
+        }
+
+        self.device_update_state.preflight_checks_passed = self.preflight_checks();
+
+        // Top panel with menu
+        egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
+            egui::menu::bar(ui, |ui| {
+                egui::menu::menu(ui, "File", |ui| {
+                    if ui.button("Quit").clicked() {
+                        frame.quit();
+                    }
+                });
+            });
+        });
+
+        // Bottom panel with app version
+        egui::TopBottomPanel::bottom("bottom_panel").show(ctx, |ui| {
+            ui.horizontal(|ui| {
+                ui.label(format!("v{}", &env!("CARGO_PKG_VERSION")));
+                egui::warn_if_debug_build(ui);
+            });
+        });
+
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.scope(|ui| {
+                ui.set_enabled(!self.device_update_state.running);
+
+                ui::device::selection(
+                    ui,
+                    &self.devices,
+                    &self.get_selected_device(),
+                    &self.message_channel.0,
+                );
+
+                ui.add_space(5.0);
+
+                ui.horizontal(|ui| {
+                    ui.set_height(110.0);
+
+                    let device_info = self.get_selected_device().map(|device| &device.info);
+
+                    device::common_info(ui, device_info);
+                    device::memory_info(ui, device_info);
+                });
+
+                ui.add_space(5.0);
+
+                ui::file::selection(
+                    ui,
+                    &self.dfu_file,
+                    &mut self.file_dialog_path,
+                    &self.message_channel.0,
+                );
+
+                ui.add_space(5.0);
+
+                ui.horizontal(|ui| {
+                    ui.set_height(140.0);
+
+                    file::common_info(
+                        ui,
+                        &self.dfu_file,
+                        &mut self.dfu_file_checks,
+                        self.device_id.is_some(),
+                    );
+
+                    let device_info = self.get_selected_device().map(|device| &device.info);
+
+                    file::content_info(ui, &self.dfu_file, device_info);
+                });
+            });
+
+            ui.add_space(5.0);
+
+            ui.horizontal(|ui| {
+                ui.set_height(85.0);
+                device::update_controls(ui, &mut self.device_update_state, &self.message_channel.0);
+                ui.add_space(10.0);
+                device::update_progress(ui, &self.device_update_state);
+            });
+        });
+    }
+}
+
+impl App {
+    /// Process a message
+    fn process_message(&mut self, message: &Message) {
+        match message {
+            Message::RescanDevices => {
+                self.scan_devices();
+            }
+            Message::DeviceSelected(device_id) => {
+                self.device_id = Some(*device_id);
+                self.match_file_against_device();
+                let device = self.get_selected_device().unwrap();
+                log::info!("Selected device {}", device.info);
+                self.device_update_state = DeviceUpdateState::default();
+            }
+            Message::ClearFile => {
+                self.dfu_file = None;
+                self.dfu_file_checks = DfuFileChecks::default();
+                self.device_update_state = DeviceUpdateState::default();
+            }
+            Message::OpenFile(file_path) => {
+                log::info!("Opening file {:?}", file_path);
+                self.open_file(file_path);
+                self.match_file_against_device();
+                if let Some(parent_path) = file_path.parent() {
+                    self.file_dialog_path = Some(std::path::PathBuf::from(parent_path));
+                }
+                self.device_update_state = DeviceUpdateState::default();
+            }
+            Message::DeviceUpdateStarted => {
+                log::info!("Device update started.");
+                self.device_update_state = DeviceUpdateState::default();
+                self.device_update_state.running = true;
+            }
+            Message::DeviceUpdateFinished => {
+                log::info!("Device update finished.");
+                self.device_update_state.running = false;
+                self.device_update_state.step = None;
+            }
+            Message::DeviceUpdateStep(step) => {
+                log::info!("Device update step {:?}", step);
+                self.device_update_state.step = Some(*step)
+            }
+            Message::DeviceEraseProgress(value) => self.device_update_state.erase_progress = *value,
+            Message::DeviceProgramProgress(value) => {
+                self.device_update_state.program_progress = *value
+            }
+            Message::DeviceVerifyProgress(value) => {
+                self.device_update_state.verify_progress = *value
+            }
+            Message::StartUpdate => {
+                if !self.device_update_state.running {
+                    let device_id = self.device_id.unwrap();
+                    let file_path = self.dfu_file.as_ref().unwrap().path.clone();
+                    let message_sender = self.message_channel.0.clone();
+                    std::thread::spawn(move || {
+                        let result = run_device_update(device_id, file_path, message_sender);
+                        match result {
+                            Ok(_) => {}
+                            Err(error) => {
+                                log::error!("{}", error);
+                            }
+                        }
+                    });
+                } else {
+                    log::error!("Update already in progress.");
+                }
+            }
+        }
+    }
+
+    /// Find all DFU devices
+    fn scan_devices(&mut self) {
+        log::info!("Scanning USB devices...");
+        let devices = dfudev::DfuDevice::find(false);
+
+        match devices {
+            Ok(devices) => {
+                if devices.is_some() {
+                    for device in devices.as_ref().unwrap().iter() {
+                        log::info!("Found DFU device {}", &device.info);
+                    }
+                    self.devices = devices;
+                    if self.device_id.is_none() {
+                        // Select the first device found
+                        self.device_id = Some(self.devices.as_ref().unwrap()[0].id);
+                        self.match_file_against_device();
+                    }
+                } else {
+                    log::info!("No DFU devices found");
+                    self.devices = None;
+                    self.device_id = None;
+                }
+            }
+            Err(error) => {
+                log::error!("{}", error);
+                self.devices = None;
+                self.device_id = None;
+            }
+        }
+    }
+
+    /// Return reference to device with a certain id
+    fn get_device(&self, id: u64) -> Option<&dfudev::DfuDevice> {
+        if self.devices.is_some() {
+            self.devices.as_ref().unwrap().iter().find(|&x| x.id == id)
+        } else {
+            None
+        }
+    }
+
+    /// Return reference to currently selected device
+    fn get_selected_device(&self) -> Option<&dfudev::DfuDevice> {
+        match self.device_id {
+            Some(device_id) => self.get_device(device_id),
+            None => None,
+        }
+    }
+
+    /// Open a DFU file
+    fn open_file(&mut self, file_path: &std::path::PathBuf) {
+        let dfu_file = dfufile::DfuFile::open(file_path);
+
+        match dfu_file {
+            Ok(mut dfu_file) => {
+                self.dfu_file_checks = DfuFileChecks::default();
+                let crc = dfu_file.calc_crc();
+                match crc {
+                    Ok(crc) => {
+                        self.dfu_file_checks.crc_checked = true;
+                        self.dfu_file_checks.crc_valid = crc == dfu_file.suffix.dwCRC;
+                    }
+                    Err(error) => {
+                        log::error!("{}", error);
+                    }
+                }
+                self.dfu_file = Some(dfu_file);
+            }
+            Err(error) => {
+                log::error!("{}", error);
+                let task = rfd::AsyncMessageDialog::new()
+                    .set_title("Error opening DFU file")
+                    .set_description(format!("{}", error).as_str())
+                    .set_buttons(rfd::MessageButtons::Ok)
+                    .set_level(rfd::MessageLevel::Error)
+                    .show();
+                execute(async {
+                    task.await;
+                });
+                self.dfu_file = None;
+            }
+        }
+    }
+
+    /// Match the selected file against the current device
+    /// and set the file check flags accordingly
+    fn match_file_against_device(&mut self) {
+        if let Some(dfu_file) = &self.dfu_file {
+            if let Some(device) = self.get_selected_device() {
+                let device_dfu_version = device.info.dfu_version;
+                let device_vendor_id = device.info.vendor_id;
+                let device_product_id = device.info.product_id;
+                let device_alt_settings = device.info.alt_settings.clone();
+                let file_dfu_version = dfu_file.suffix.bcdDFU;
+                let file_vendor_id = dfu_file.suffix.idVendor;
+                let file_product_id = dfu_file.suffix.idProduct;
+
+                self.dfu_file_checks.dfu_version_valid = file_dfu_version == device_dfu_version;
+
+                self.dfu_file_checks.vendor_id_accepted =
+                    (file_vendor_id == 0xFFFF) || (file_vendor_id == device_vendor_id);
+                self.dfu_file_checks.product_id_accepted =
+                    (file_product_id == 0xFFFF) || (file_product_id == device_product_id);
+
+                match &dfu_file.content {
+                    dfufile::Content::Plain => {
+                        self.dfu_file_checks.targets_valid = true;
+                    }
+                    dfufile::Content::DfuSe(content) => {
+                        self.dfu_file_checks.targets_valid = true;
+                        for image in &content.images {
+                            let target = device_alt_settings
+                                .iter()
+                                .find(|&alt| alt.0 == image.target_prefix.bAlternateSetting);
+                            if target.is_none() {
+                                self.dfu_file_checks.targets_valid = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// Check if everything is ready to program the device
+    fn preflight_checks(&self) -> bool {
+        let device = self.get_selected_device();
+
+        let checks = &self.dfu_file_checks;
+
+        device.is_some()
+            && self.dfu_file.is_some()
+            && checks.crc_valid
+            && checks.dfu_version_valid
+            && checks.vendor_id_accepted
+            && checks.product_id_accepted
+            && checks.targets_valid
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+/// Update the device by performing several tasks (erase, program, verify).
+///
+/// This function is executed in a separate thread and communicates with
+/// the main thread via messages
+fn run_device_update(
+    device_id: u64,
+    file_path: std::path::PathBuf,
+    message_sender: std::sync::mpsc::Sender<Message>,
+) -> Result<()> {
+    message_sender.send(Message::DeviceUpdateStarted)?;
+    erase_device(device_id, &file_path, &message_sender)?;
+    program_device(device_id, &file_path, &message_sender)?;
+    verify_device(device_id, &file_path, &message_sender)?;
+    message_sender.send(Message::DeviceUpdateFinished)?;
+
+    Ok(())
+}
+
+/// Erase the data in the device.
+fn erase_device(
+    device_id: u64,
+    file_path: &std::path::PathBuf,
+    message_sender: &std::sync::mpsc::Sender<Message>,
+) -> Result<()> {
+    // Set the step so UI knows it
+    message_sender
+        .send(Message::DeviceUpdateStep(DeviceUpdateStep::Erase))
+        .ok();
+
+    // Find the device by its id and open it
+    let mut device = dfudev::DfuDevice::find_by_id(device_id)?.unwrap();
+    device.open()?;
+
+    // Make sure device is in idle state before operations start
+    device.abort_request()?;
+
+    // Make sure status is OK
+    while let Ok(status) = device.getstatus_request() {
+        if status.bStatus == dfudev::DeviceStatusCode::OK {
+            break;
+        } else {
+            device.clrstatus_request()?;
+        }
+    }
+
+    let mut file = dfufile::DfuFile::open(file_path)?;
+
+    match &file.content {
+        dfufile::Content::Plain => {
+            log::info!("Plain DFU does not support separate erase. Skipped.");
+        }
+        dfufile::Content::DfuSe(content) => {
+            let num_images = content.images.len();
+
+            for (image_no, image) in content.images.iter().enumerate() {
+                let alt_setting = image.target_prefix.bAlternateSetting;
+                let target = device
+                    .info
+                    .alt_settings
+                    .iter()
+                    .find(|&alt| alt.0 == alt_setting);
+
+                if let Some(target) = target {
+                    let memory_segment = dfudev::dfuse::MemorySegment::from_string_desc(&target.1);
+                    log::info!(
+                        "Found target \"{}\" for alt setting {}",
+                        memory_segment.name,
+                        target.0,
+                    );
+
+                    let num_elements = image.image_elements.len();
+
+                    for (element_no, element) in image.image_elements.iter().enumerate() {
+                        log::info!(
+                            "Reading element at address 0x{:08X}, size {}",
+                            element.dwElementAddress,
+                            element.dwElementSize
+                        );
+                        let start_address = element.dwElementAddress;
+                        let end_address = start_address + element.dwElementSize;
+                        let region = memory_segment.regions.iter().find(|x| {
+                            x.start_address <= start_address
+                                && x.end_address >= end_address
+                                && x.erasable
+                        });
+
+                        if let Some(region) = region {
+                            let sector_size = region.sector_size;
+                            let num_sectors = (end_address - start_address) / sector_size;
+                            log::info!("Memory region found, sector size is {}", sector_size);
+                            let mut erase_address = start_address / sector_size * sector_size;
+                            let mut sector_no = 0;
+
+                            while erase_address <= end_address {
+                                log::info!("Erasing sector at 0x{:08X}", erase_address);
+
+                                dfudev::dfuse::erase_page(&device, erase_address)?;
+
+                                let progress = (sector_no as f32) / (num_sectors as f32)
+                                    * ((image_no + 1) as f32)
+                                    / (num_images as f32)
+                                    * ((element_no + 1) as f32)
+                                    / (num_elements as f32);
+                                message_sender
+                                    .send(Message::DeviceEraseProgress(progress))
+                                    .ok();
+
+                                erase_address += sector_size;
+                                sector_no += 1;
+                            }
+                        } else {
+                            log::error!("No memory region found that matches address range");
+                        }
+                    }
+                } else {
+                    log::error!("No target found for alt setting {}", alt_setting);
+                }
+            }
+        }
+    }
+
+    // Final cleanup
+    device.abort_request()?;
+    device.close();
+
+    Ok(())
+}
+
+/// Downloads the data to the device.
+fn program_device(
+    device_id: u64,
+    file_path: &std::path::PathBuf,
+    message_sender: &std::sync::mpsc::Sender<Message>,
+) -> Result<()> {
+    // Set the step so UI knows it
+    message_sender
+        .send(Message::DeviceUpdateStep(DeviceUpdateStep::Program))
+        .ok();
+
+    // Find the device by its id and open it
+    let mut device = dfudev::DfuDevice::find_by_id(device_id)?.unwrap();
+    device.open()?;
+
+    // Make sure device is in idle state before operations start
+    device.abort_request()?;
+
+    // Make sure status is OK
+    while let Ok(status) = device.getstatus_request() {
+        if status.bStatus == dfudev::DeviceStatusCode::OK {
+            break;
+        } else {
+            device.clrstatus_request()?;
+        }
+    }
+
+    let mut file = dfufile::DfuFile::open(file_path)?;
+
+    match &file.content {
+        dfufile::Content::Plain => {
+            log::info!("Plain DFU is not supported yet.");
+        }
+        dfufile::Content::DfuSe(content) => {
+            let num_images = content.images.len();
+
+            for (image_no, image) in content.images.iter().enumerate() {
+                let alt_setting = image.target_prefix.bAlternateSetting;
+                let target = device
+                    .info
+                    .alt_settings
+                    .iter()
+                    .find(|&alt| alt.0 == alt_setting);
+
+                if let Some(target) = target {
+                    let memory_segment = dfudev::dfuse::MemorySegment::from_string_desc(&target.1);
+                    let transfer_size = memory_segment
+                        .regions
+                        .iter()
+                        .min_by_key(|x| x.sector_size)
+                        .unwrap()
+                        .sector_size;
+                    let transfer_size =
+                        std::cmp::min(transfer_size as u16, device.info.dfu_transfer_size);
+                    log::info!(
+                        "Found target \"{}\" for alt setting {}. Transfer size is {} bytes",
+                        memory_segment.name,
+                        target.0,
+                        transfer_size
+                    );
+
+                    let num_elements = image.image_elements.len();
+
+                    for (element_no, element) in image.image_elements.iter().enumerate() {
+                        log::info!(
+                            "Reading element at address 0x{:08X}, size {}",
+                            element.dwElementAddress,
+                            element.dwElementSize
+                        );
+                        let start_address = element.dwElementAddress;
+                        let end_address = start_address + element.dwElementSize;
+                        let mut write_address = start_address;
+
+                        dfudev::dfuse::set_address(&device, write_address)?;
+
+                        let mut block_no = 0;
+                        let num_blocks = (end_address - start_address) / transfer_size as u32;
+
+                        while write_address < end_address {
+                            let chunk_size =
+                                std::cmp::min(transfer_size as u32, end_address - write_address);
+
+                            let mut file_data = vec![0; chunk_size as usize];
+                            element.read_at(
+                                &mut file.file,
+                                write_address - start_address,
+                                &mut file_data,
+                            )?;
+
+                            log::info!(
+                                "Programming block {} with {} bytes at address 0x{:08X}",
+                                block_no,
+                                chunk_size,
+                                write_address
+                            );
+
+                            device.download_request(block_no + 2, &file_data)?;
+
+                            // First status response must have state dfuDNBUSY
+                            let status = device.getstatus_request()?;
+                            if status.bState != dfudev::states::DeviceStateCode::dfuDNBUSY {
+                                return Err(Box::new(dfudev::Error::InvalidDeviceState(
+                                    status.bState,
+                                )));
+                            }
+
+                            device.wait_for_status_response(status.bwPollTimeout as u64)?;
+
+                            log::info!("Block no {} written", block_no);
+
+                            let progress = (block_no as f32) / (num_blocks as f32)
+                                * ((image_no + 1) as f32)
+                                / (num_images as f32)
+                                * ((element_no + 1) as f32)
+                                / (num_elements as f32);
+                            message_sender
+                                .send(Message::DeviceProgramProgress(progress))
+                                .ok();
+
+                            write_address += chunk_size;
+                            block_no += 1;
+                        }
+                    }
+                } else {
+                    log::error!("No target found for alt setting {}", alt_setting);
+                }
+            }
+        }
+    }
+
+    // Final cleanup
+    device.abort_request()?;
+    device.close();
+
+    Ok(())
+}
+
+/// Verifys the data in the device.
+fn verify_device(
+    device_id: u64,
+    file_path: &std::path::PathBuf,
+    message_sender: &std::sync::mpsc::Sender<Message>,
+) -> Result<()> {
+    // Set the step so UI knows it
+    message_sender
+        .send(Message::DeviceUpdateStep(DeviceUpdateStep::Verify))
+        .ok();
+
+    // Find the device by its id and open it
+    let mut device = dfudev::DfuDevice::find_by_id(device_id)?.unwrap();
+    device.open()?;
+
+    // Make sure device is in idle state before operations start
+    device.abort_request()?;
+
+    // Make sure status is OK
+    while let Ok(status) = device.getstatus_request() {
+        if status.bStatus == dfudev::DeviceStatusCode::OK {
+            break;
+        } else {
+            device.clrstatus_request()?;
+        }
+    }
+
+    let mut file = dfufile::DfuFile::open(file_path)?;
+
+    match &file.content {
+        dfufile::Content::Plain => {
+            log::info!("Plain DFU is not supported yet.");
+        }
+        dfufile::Content::DfuSe(content) => {
+            let num_images = content.images.len();
+
+            for (image_no, image) in content.images.iter().enumerate() {
+                let alt_setting = image.target_prefix.bAlternateSetting;
+                let target = device
+                    .info
+                    .alt_settings
+                    .iter()
+                    .find(|&alt| alt.0 == alt_setting);
+
+                if let Some(target) = target {
+                    let memory_segment = dfudev::dfuse::MemorySegment::from_string_desc(&target.1);
+                    let transfer_size = memory_segment
+                        .regions
+                        .iter()
+                        .min_by_key(|x| x.sector_size)
+                        .unwrap()
+                        .sector_size;
+                    let transfer_size =
+                        std::cmp::min(transfer_size as u16, device.info.dfu_transfer_size);
+                    log::info!(
+                        "Found target \"{}\" for alt setting {}. Transfer size is {} bytes",
+                        memory_segment.name,
+                        target.0,
+                        transfer_size
+                    );
+
+                    let num_elements = image.image_elements.len();
+
+                    for (element_no, element) in image.image_elements.iter().enumerate() {
+                        log::info!(
+                            "Reading element at address 0x{:08X}, size {}",
+                            element.dwElementAddress,
+                            element.dwElementSize
+                        );
+                        let start_address = element.dwElementAddress;
+                        let end_address = start_address + element.dwElementSize;
+                        let mut read_address = start_address;
+
+                        dfudev::dfuse::set_address(&device, read_address)?;
+
+                        let mut block_no = 0;
+                        let num_blocks = (end_address - start_address) / transfer_size as u32;
+
+                        while read_address < end_address {
+                            let chunk_size =
+                                std::cmp::min(transfer_size as u32, end_address - read_address);
+
+                            let mut device_data = vec![0; chunk_size as usize];
+                            device.upload_request(block_no + 2, &mut device_data)?;
+
+                            let mut file_data = vec![0; chunk_size as usize];
+                            element.read_at(
+                                &mut file.file,
+                                read_address - start_address,
+                                &mut file_data,
+                            )?;
+
+                            if device_data != file_data {
+                                log::error!("Data on block {} is not correct.", block_no);
+                            }
+
+                            let progress = (block_no as f32) / (num_blocks as f32)
+                                * ((image_no + 1) as f32)
+                                / (num_images as f32)
+                                * ((element_no + 1) as f32)
+                                / (num_elements as f32);
+                            message_sender
+                                .send(Message::DeviceVerifyProgress(progress))
+                                .ok();
+
+                            read_address += chunk_size;
+                            block_no += 1;
+                        }
+                    }
+                } else {
+                    log::error!("No target found for alt setting {}", alt_setting);
+                }
+            }
+        }
+    }
+
+    // Final cleanup
+    device.abort_request()?;
+    device.close();
+
+    Ok(())
+}
