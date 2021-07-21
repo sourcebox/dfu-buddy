@@ -99,7 +99,7 @@ impl DfuDevice {
                 Err(_) => continue,
             };
 
-            for n in 0..device_desc.num_configurations() {
+            'outer: for n in 0..device_desc.num_configurations() {
                 let config_desc = match device.config_descriptor(n) {
                     Ok(desc) => desc,
                     Err(_) => continue,
@@ -114,7 +114,7 @@ impl DfuDevice {
                             found = true;
                             config_number = config_desc.number();
                             interface_number = interface_desc.interface_number();
-                            break;
+                            break 'outer;
                         }
                     }
                 }
@@ -147,7 +147,7 @@ impl DfuDevice {
 
     /// Find a device by its id
     pub fn find_by_id(id: u64) -> Result<Option<Self>> {
-        let devices = Self::find(true)?;
+        let devices = Self::find(false)?;
 
         if let Some(devices) = devices {
             Ok(devices.into_iter().find(|x| x.id == id))
