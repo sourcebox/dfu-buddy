@@ -27,3 +27,8 @@ persistence = ["eframe/persistence", "serde"]
 
 [profile.release]
 lto = true
+
+[package.metadata.bundle]
+name = "DFU Buddy"
+identifier = "de.sourcebox.dfu-buddy"
+osx_minimum_system_version = "10.11"

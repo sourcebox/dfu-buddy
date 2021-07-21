@@ -41,6 +41,16 @@ On Linux, a couple of additional dependencies must be installed:
 
 USB access is provided via the [rusb](https://github.com/a1ien/rusb) crate, which uses pkg-config to locate the libusb sources. Make sure the sources are in a location where pkg-config can find them.
 
+### Mac Application Bundle (optional)
+
+To build a macOS application bundle, additional dependencies must be installed:
+
+- [cargo-bundle](https://github.com/burtonageo/cargo-bundle)
+- [Python3](https://python.org) (any recent version should work)
+
+Run `./build-mac-bundle.sh` from the project directory. Make sure the script has executable permissions.
+The bundle will be created in the `./target/release/bundle/osx` directory.
+
 ## License
 
 Published under the MIT license.
