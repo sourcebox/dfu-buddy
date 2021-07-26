@@ -51,7 +51,7 @@ fn erase_device(
 
     match &file.content {
         dfufile::Content::Plain => {
-            log::info!("Plain DFU does not support separate erase. Skipped.");
+            log::warn!("Plain DFU does not support separate erase. Skipped.");
         }
         dfufile::Content::DfuSe(content) => {
             let num_images = content.images.len();
@@ -66,7 +66,7 @@ fn erase_device(
 
                 if let Some(target) = target {
                     let memory_segment = dfudev::dfuse::MemorySegment::from_string_desc(&target.1);
-                    log::info!(
+                    log::debug!(
                         "Found target \"{}\" for alt setting {}",
                         memory_segment.name,
                         target.0,
@@ -75,7 +75,7 @@ fn erase_device(
                     let num_elements = image.image_elements.len();
 
                     for (element_no, element) in image.image_elements.iter().enumerate() {
-                        log::info!(
+                        log::debug!(
                             "Reading element at address 0x{:08X}, size {}",
                             element.dwElementAddress,
                             element.dwElementSize
@@ -91,12 +91,12 @@ fn erase_device(
                         if let Some(region) = region {
                             let sector_size = region.sector_size;
                             let num_sectors = (end_address - start_address) / sector_size;
-                            log::info!("Memory region found, sector size is {}", sector_size);
+                            log::debug!("Memory region found, sector size is {}", sector_size);
                             let mut erase_address = start_address / sector_size * sector_size;
                             let mut sector_no = 0;
 
                             while erase_address <= end_address {
-                                log::info!("Erasing sector at 0x{:08X}", erase_address);
+                                log::debug!("Erasing sector at 0x{:08X}", erase_address);
 
                                 dfudev::dfuse::erase_page(&device, erase_address)?;
 
@@ -161,7 +161,7 @@ fn program_device(
 
     match &file.content {
         dfufile::Content::Plain => {
-            log::info!("Plain DFU is not supported yet.");
+            log::error!("Plain DFU is not supported yet.");
         }
         dfufile::Content::DfuSe(content) => {
             let num_images = content.images.len();
@@ -184,7 +184,7 @@ fn program_device(
                         .sector_size;
                     let transfer_size =
                         std::cmp::min(transfer_size as u16, device.info.dfu_transfer_size);
-                    log::info!(
+                    log::debug!(
                         "Found target \"{}\" for alt setting {}. Transfer size is {} bytes",
                         memory_segment.name,
                         target.0,
@@ -194,7 +194,7 @@ fn program_device(
                     let num_elements = image.image_elements.len();
 
                     for (element_no, element) in image.image_elements.iter().enumerate() {
-                        log::info!(
+                        log::debug!(
                             "Reading element at address 0x{:08X}, size {}",
                             element.dwElementAddress,
                             element.dwElementSize
@@ -219,7 +219,7 @@ fn program_device(
                                 &mut file_data,
                             )?;
 
-                            log::info!(
+                            log::debug!(
                                 "Programming block {} with {} bytes at address 0x{:08X}",
                                 block_no,
                                 chunk_size,
@@ -238,7 +238,7 @@ fn program_device(
 
                             device.wait_for_status_response(status.bwPollTimeout as u64)?;
 
-                            log::info!("Block no {} written", block_no);
+                            log::debug!("Block no {} written", block_no);
 
                             let progress = (block_no as f32) / (num_blocks as f32)
                                 * ((image_no + 1) as f32)
@@ -298,7 +298,7 @@ fn verify_device(
 
     match &file.content {
         dfufile::Content::Plain => {
-            log::info!("Plain DFU is not supported yet.");
+            log::error!("Plain DFU is not supported yet.");
         }
         dfufile::Content::DfuSe(content) => {
             let num_images = content.images.len();
@@ -321,7 +321,7 @@ fn verify_device(
                         .sector_size;
                     let transfer_size =
                         std::cmp::min(transfer_size as u16, device.info.dfu_transfer_size);
-                    log::info!(
+                    log::debug!(
                         "Found target \"{}\" for alt setting {}. Transfer size is {} bytes",
                         memory_segment.name,
                         target.0,
@@ -331,7 +331,7 @@ fn verify_device(
                     let num_elements = image.image_elements.len();
 
                     for (element_no, element) in image.image_elements.iter().enumerate() {
-                        log::info!(
+                        log::debug!(
                             "Reading element at address 0x{:08X}, size {}",
                             element.dwElementAddress,
                             element.dwElementSize

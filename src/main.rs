@@ -342,7 +342,7 @@ impl App {
                 self.device_id = Some(*device_id);
                 self.match_file_against_device();
                 let device = self.get_selected_device().unwrap();
-                log::info!("Selected device {}", device.info);
+                log::debug!("Selected device {}", device.info);
                 self.device_update_state = DeviceUpdateState::default();
             }
             Message::ClearFile => {
@@ -351,7 +351,7 @@ impl App {
                 self.device_update_state = DeviceUpdateState::default();
             }
             Message::OpenFile(file_path) => {
-                log::info!("Opening file {:?}", file_path);
+                log::debug!("Opening file {:?}", file_path);
                 self.open_file(file_path);
                 self.match_file_against_device();
                 if let Some(parent_path) = file_path.parent() {
@@ -360,17 +360,17 @@ impl App {
                 self.device_update_state = DeviceUpdateState::default();
             }
             Message::DeviceUpdateStarted => {
-                log::info!("Device update started.");
+                log::debug!("Device update started.");
                 self.device_update_state = DeviceUpdateState::default();
                 self.device_update_state.running = true;
             }
             Message::DeviceUpdateFinished => {
-                log::info!("Device update finished.");
+                log::debug!("Device update finished.");
                 self.device_update_state.running = false;
                 self.device_update_state.step = None;
             }
             Message::DeviceUpdateStep(step) => {
-                log::info!("Device update step {:?}", step);
+                log::debug!("Device update step {:?}", step);
                 self.device_update_state.step = Some(*step)
             }
             Message::DeviceEraseProgress(value) => self.device_update_state.erase_progress = *value,
@@ -403,14 +403,14 @@ impl App {
 
     /// Find all DFU devices
     fn scan_devices(&mut self) {
-        log::info!("Scanning USB devices...");
+        log::debug!("Scanning USB devices...");
         let devices = dfudev::DfuDevice::find(false);
 
         match devices {
             Ok(devices) => {
                 if devices.is_some() {
                     for device in devices.as_ref().unwrap().iter() {
-                        log::info!("Found DFU device {}", &device.info);
+                        log::debug!("Found DFU device {}", &device.info);
                     }
                     self.devices = devices;
                     if self.device_id.is_none() {
@@ -419,7 +419,7 @@ impl App {
                         self.match_file_against_device();
                     }
                 } else {
-                    log::info!("No DFU devices found");
+                    log::debug!("No DFU devices found");
                     self.devices = None;
                     self.device_id = None;
                 }
