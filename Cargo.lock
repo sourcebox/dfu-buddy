@@ -563,7 +563,7 @@ checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 [[package]]
 name = "eframe"
 version = "0.13.1"
-source = "git+https://github.com/emilk/egui?rev=faf104220be18cda878e9864bab3760caa4901d8#faf104220be18cda878e9864bab3760caa4901d8"
+source = "git+https://github.com/emilk/egui?rev=52d187ab5f036e1a0fa47892bce2eba2d4ada0f0#52d187ab5f036e1a0fa47892bce2eba2d4ada0f0"
 dependencies = [
  "egui",
  "egui_glium",
@@ -574,7 +574,7 @@ dependencies = [
 [[package]]
 name = "egui"
 version = "0.13.1"
-source = "git+https://github.com/emilk/egui?rev=faf104220be18cda878e9864bab3760caa4901d8#faf104220be18cda878e9864bab3760caa4901d8"
+source = "git+https://github.com/emilk/egui?rev=52d187ab5f036e1a0fa47892bce2eba2d4ada0f0#52d187ab5f036e1a0fa47892bce2eba2d4ada0f0"
 dependencies = [
  "epaint",
  "ron",
@@ -584,7 +584,7 @@ dependencies = [
 [[package]]
 name = "egui_glium"
 version = "0.13.1"
-source = "git+https://github.com/emilk/egui?rev=faf104220be18cda878e9864bab3760caa4901d8#faf104220be18cda878e9864bab3760caa4901d8"
+source = "git+https://github.com/emilk/egui?rev=52d187ab5f036e1a0fa47892bce2eba2d4ada0f0#52d187ab5f036e1a0fa47892bce2eba2d4ada0f0"
 dependencies = [
  "copypasta",
  "directories-next",
@@ -599,7 +599,7 @@ dependencies = [
 [[package]]
 name = "egui_web"
 version = "0.13.0"
-source = "git+https://github.com/emilk/egui?rev=faf104220be18cda878e9864bab3760caa4901d8#faf104220be18cda878e9864bab3760caa4901d8"
+source = "git+https://github.com/emilk/egui?rev=52d187ab5f036e1a0fa47892bce2eba2d4ada0f0#52d187ab5f036e1a0fa47892bce2eba2d4ada0f0"
 dependencies = [
  "egui",
  "epi",
@@ -614,7 +614,7 @@ dependencies = [
 [[package]]
 name = "emath"
 version = "0.13.0"
-source = "git+https://github.com/emilk/egui?rev=faf104220be18cda878e9864bab3760caa4901d8#faf104220be18cda878e9864bab3760caa4901d8"
+source = "git+https://github.com/emilk/egui?rev=52d187ab5f036e1a0fa47892bce2eba2d4ada0f0#52d187ab5f036e1a0fa47892bce2eba2d4ada0f0"
 dependencies = [
  "serde",
 ]
@@ -622,7 +622,7 @@ dependencies = [
 [[package]]
 name = "epaint"
 version = "0.13.0"
-source = "git+https://github.com/emilk/egui?rev=faf104220be18cda878e9864bab3760caa4901d8#faf104220be18cda878e9864bab3760caa4901d8"
+source = "git+https://github.com/emilk/egui?rev=52d187ab5f036e1a0fa47892bce2eba2d4ada0f0#52d187ab5f036e1a0fa47892bce2eba2d4ada0f0"
 dependencies = [
  "ab_glyph",
  "ahash",
@@ -635,7 +635,7 @@ dependencies = [
 [[package]]
 name = "epi"
 version = "0.13.0"
-source = "git+https://github.com/emilk/egui?rev=faf104220be18cda878e9864bab3760caa4901d8#faf104220be18cda878e9864bab3760caa4901d8"
+source = "git+https://github.com/emilk/egui?rev=52d187ab5f036e1a0fa47892bce2eba2d4ada0f0#52d187ab5f036e1a0fa47892bce2eba2d4ada0f0"
 dependencies = [
  "egui",
  "ron",
