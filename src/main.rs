@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 mod dfudev;
 mod ui;
 mod update;
