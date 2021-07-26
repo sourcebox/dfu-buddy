@@ -15,7 +15,7 @@ eframe = { git = "https://github.com/emilk/egui", rev = "52d187ab5f036e1a0fa4789
 log = "0.4"
 simple_logger = "1.11"
 serde = { version = "1", features = ["derive"], optional = true }
-rusb = "0.8"
+rusb = { version="0.8", features=["vendored"] }
 rfd = "0.4"
 dirs = "3.0"
 futures = "0.3"
