@@ -20,7 +20,7 @@ fn main() -> Result<()> {
 
     let app = App::default();
     let native_options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(750.0, 500.0)),
+        initial_window_size: Some(egui::vec2(750.0, 505.0)),
         resizable: false,
         ..eframe::NativeOptions::default()
     };
@@ -284,7 +284,7 @@ impl epi::App for App {
                 ui.add_space(5.0);
 
                 ui.horizontal(|ui| {
-                    ui.set_height(110.0);
+                    ui.set_height(140.0);
 
                     let device_info = self.get_selected_device().map(|device| &device.info);
 
