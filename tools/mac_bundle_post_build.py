@@ -54,6 +54,17 @@ def get_used_libs(file_):
     return libs
 
 
+def create_dmg(bundle_dir):
+    """Create a DMG file with the bundle"""
+    name, ext = os.path.splitext(os.path.basename(bundle_dir))
+    dmg_file = os.path.join(os.path.dirname(bundle_dir), name + '.dmg')
+    print(f"Creating DMG file {dmg_file}")
+    if os.path.exists(dmg_file):
+        os.remove(dmg_file)
+    subprocess.call(['hdiutil', 'create', '-fs', 'HFS+',
+                    '-volname', name, '-srcfolder', bundle_dir, dmg_file])
+
+
 def main():
     if len(sys.argv) < 2:
         sys.exit("No input argument given.")
@@ -103,6 +114,8 @@ def main():
                                             os.path.relpath(lib_dep_file, macos_dir))
                 subprocess.call(['install_name_tool', '-change', lib_dep,
                                 new_lib_path, lib_file])
+
+    create_dmg(bundle_dir)
 
 
 if __name__ == '__main__':
