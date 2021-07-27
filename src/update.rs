@@ -113,11 +113,14 @@ fn erase_device(
                                 sector_no += 1;
                             }
                         } else {
-                            log::error!("No memory region found that matches address range");
+                            return Err(Box::new(Error::MemoryRegionNotFound(
+                                start_address,
+                                end_address,
+                            )));
                         }
                     }
                 } else {
-                    log::error!("No target found for alt setting {}", alt_setting);
+                    return Err(Box::new(Error::TargetNotFound(alt_setting)));
                 }
             }
         }
@@ -161,7 +164,7 @@ fn program_device(
 
     match &file.content {
         dfufile::Content::Plain => {
-            log::error!("Plain DFU is not supported yet.");
+            return Err(Box::new(Error::PlainDfuNotSupported));
         }
         dfufile::Content::DfuSe(content) => {
             let num_images = content.images.len();
@@ -254,7 +257,7 @@ fn program_device(
                         }
                     }
                 } else {
-                    log::error!("No target found for alt setting {}", alt_setting);
+                    return Err(Box::new(Error::TargetNotFound(alt_setting)));
                 }
             }
         }
@@ -298,7 +301,7 @@ fn verify_device(
 
     match &file.content {
         dfufile::Content::Plain => {
-            log::error!("Plain DFU is not supported yet.");
+            return Err(Box::new(Error::PlainDfuNotSupported));
         }
         dfufile::Content::DfuSe(content) => {
             let num_images = content.images.len();
@@ -360,7 +363,7 @@ fn verify_device(
                             )?;
 
                             if device_data != file_data {
-                                log::error!("Data on block {} is not correct.", block_no);
+                                return Err(Box::new(Error::VerifyError(read_address)));
                             }
 
                             let progress = (block_no as f32) / (num_blocks as f32)
@@ -377,7 +380,7 @@ fn verify_device(
                         }
                     }
                 } else {
-                    log::error!("No target found for alt setting {}", alt_setting);
+                    return Err(Box::new(Error::TargetNotFound(alt_setting)));
                 }
             }
         }
@@ -388,4 +391,43 @@ fn verify_device(
     device.close();
 
     Ok(())
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+#[derive(Debug)]
+pub enum Error {
+    /// Target not found for an alternate setting
+    TargetNotFound(u8),
+
+    /// Memory region not found for an address range
+    MemoryRegionNotFound(u32, u32),
+
+    /// Verification error
+    VerifyError(u32),
+
+    /// Plain DFU is not supported yet
+    PlainDfuNotSupported,
+}
+
+impl std::error::Error for Error {}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::TargetNotFound(alt_setting) =>
+                    format!("No target found for alt setting {}.", alt_setting),
+                Self::MemoryRegionNotFound(start_address, end_address) => format!(
+                    "No memory region found with address 0x{:08X}..0x{:08X}",
+                    start_address, end_address
+                ),
+                Self::VerifyError(address) =>
+                    format!("Verification failed at address 0x{:08X}.", address),
+                Self::PlainDfuNotSupported => "Plain DFU devices are not supported yet".to_string(),
+            }
+        )
+    }
 }
