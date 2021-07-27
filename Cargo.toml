@@ -8,11 +8,9 @@ repository = "https://github.com/sourcebox/dfu-buddy"
 license = "MIT"
 
 [dependencies]
-#dfufile = { path = "../dfufile" }
 dfufile = { git = "https://github.com/sourcebox/dfufile-rs", rev = "356184f17f380cdbad4cedff460e4cc8bc612771"}
-#eframe = "0.13"
 eframe = { git = "https://github.com/emilk/egui", rev = "52d187ab5f036e1a0fa47892bce2eba2d4ada0f0", features=["persistence"]}
-log = "0.4"
+log = { version = "0.4", features = ["max_level_debug", "release_max_level_info"] }
 simple_logger = "1.11"
 serde = { version = "1", features = ["derive"], optional = true }
 rusb = { version="0.8", features=["vendored"] }
