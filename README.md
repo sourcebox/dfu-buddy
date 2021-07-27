@@ -4,6 +4,8 @@
 
 DFU Buddy is a cross-platform GUI utility for performing firmware upgrades on embedded devices via USB.
 
+![Screenshot](screenshot.png)
+
 It is based on the DFU standard [USB Device Firmware Upgrade Specification, Revision 1.1](https://usb.org/sites/default/files/DFU_1.1.pdf), published by the [USB Implementers Forum](https://www.usb.org) and supports the DfuSe extensions by STMicroelectronics.
 
 Operation is designed to be simple and straightforward for non-expert users. Therefore, a number of more advanced (and potentially dangerous) features are not provided. If you need these and you know what you're doing, use a tool like [dfu-util](http://dfu-util.sourceforge.net/).
