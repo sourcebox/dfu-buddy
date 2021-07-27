@@ -173,37 +173,79 @@ pub fn update_controls(
         ui.set_width(ui.available_width() / 3.0);
         ui.set_height(ui.available_size().y);
 
-        if update_state.preflight_checks_passed {
+        if update_state.error.is_some() {
             ui.vertical_centered(|ui| {
-                ui.add(
-                    egui::Label::new("Warning! All data on device will be erased!")
-                        .text_color(egui::Color32::YELLOW),
-                );
-
                 ui.add_space(10.0);
-
-                ui.checkbox(&mut update_state.confirmed, "Confirm to proceed.");
-
-                ui.add_space(10.0);
-
-                ui.scope(|ui| {
-                    ui.set_enabled(update_state.confirmed);
-                    let update_button = ui
-                        .add(egui::widgets::Button::new("Start update").fill(egui::Color32::BLUE));
-
-                    if update_button.clicked() {
-                        message_sender.send(Message::StartUpdate).ok();
-                        update_state.confirmed = false;
-                    };
-                });
-            });
-        } else {
-            ui.centered_and_justified(|ui| {
+                ui.add(egui::Label::new("Error:").text_color(egui::Color32::RED));
                 ui.add(
-                    egui::Label::new("Some requirements are not met.\nPlease check your settings.")
+                    egui::Label::new(update_state.error.as_ref().unwrap())
                         .text_color(egui::Color32::RED),
                 );
+                ui.add_space(10.0);
+
+                let continue_button =
+                    ui.add(egui::widgets::Button::new("Continue").fill(egui::Color32::BLUE));
+
+                if continue_button.clicked() {
+                    update_state.error = None;
+                };
             });
+        } else if update_state.running {
+            ui.centered_and_justified(|ui| {
+                ui.label("Update in progress...");
+            });
+        } else if update_state.finished {
+            ui.vertical_centered(|ui| {
+                ui.add_space(10.0);
+                ui.add(
+                    egui::Label::new("Update finished successfully.")
+                        .text_color(egui::Color32::GREEN),
+                );
+                ui.add_space(10.0);
+
+                let continue_button =
+                    ui.add(egui::widgets::Button::new("Continue").fill(egui::Color32::BLUE));
+
+                if continue_button.clicked() {
+                    *update_state = DeviceUpdateState::default();
+                };
+            });
+        } else {
+            if update_state.preflight_checks_passed {
+                ui.vertical_centered(|ui| {
+                    ui.add_space(5.0);
+                    ui.add(
+                        egui::Label::new("Warning! All data on device will be erased!")
+                            .text_color(egui::Color32::YELLOW),
+                    );
+                    ui.add_space(10.0);
+
+                    ui.checkbox(&mut update_state.confirmed, "Confirm to proceed.");
+
+                    ui.add_space(10.0);
+
+                    ui.scope(|ui| {
+                        ui.set_enabled(update_state.confirmed);
+                        let update_button = ui.add(
+                            egui::widgets::Button::new("Start update").fill(egui::Color32::BLUE),
+                        );
+
+                        if update_button.clicked() {
+                            message_sender.send(Message::StartUpdate).ok();
+                            update_state.confirmed = false;
+                        };
+                    });
+                });
+            } else {
+                ui.centered_and_justified(|ui| {
+                    ui.add(
+                        egui::Label::new(
+                            "Some requirements are not met.\nPlease check your settings.",
+                        )
+                        .text_color(egui::Color32::RED),
+                    );
+                });
+            }
         }
     });
 }

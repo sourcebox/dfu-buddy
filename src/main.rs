@@ -98,6 +98,9 @@ pub enum Message {
     /// Send from update task when everything is finished
     DeviceUpdateFinished,
 
+    /// Send from update task when an error has occurred
+    DeviceUpdateError(String),
+
     /// Set a new update step
     DeviceUpdateStep(DeviceUpdateStep),
 
@@ -146,11 +149,17 @@ pub struct DeviceUpdateState {
     /// Confirmation flag set by user checkbox
     confirmed: bool,
 
-    /// Update in progress
+    /// Update in progress flag
     running: bool,
+
+    /// Flag set after finishing without errors
+    finished: bool,
 
     /// Current step
     step: Option<DeviceUpdateStep>,
+
+    /// Last error
+    error: Option<String>,
 
     /// Erase operation progress 0..1 for 0..100%
     erase_progress: f32,
@@ -365,11 +374,18 @@ impl App {
                 log::debug!("Device update started.");
                 self.device_update_state = DeviceUpdateState::default();
                 self.device_update_state.running = true;
+                self.device_update_state.finished = false;
             }
             Message::DeviceUpdateFinished => {
                 log::debug!("Device update finished.");
                 self.device_update_state.running = false;
                 self.device_update_state.step = None;
+                self.device_update_state.finished = true;
+            }
+            Message::DeviceUpdateError(error) => {
+                log::error!("Device update error: {}", error);
+                self.device_update_state.running = false;
+                self.device_update_state.error = Some(error.to_string());
             }
             Message::DeviceUpdateStep(step) => {
                 log::debug!("Device update step {:?}", step);
@@ -387,12 +403,15 @@ impl App {
                     let device_id = self.device_id.unwrap();
                     let file_path = self.dfu_file.as_ref().unwrap().path.clone();
                     let message_sender = self.message_channel.0.clone();
+                    let message_sender_result = self.message_channel.0.clone();
                     std::thread::spawn(move || {
                         let result = update::full_update(device_id, file_path, message_sender);
                         match result {
                             Ok(_) => {}
                             Err(error) => {
-                                log::error!("{}", error);
+                                message_sender_result
+                                    .send(Message::DeviceUpdateError(format!("{}", error)))
+                                    .ok();
                             }
                         }
                     });
