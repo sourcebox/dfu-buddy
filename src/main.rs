@@ -143,6 +143,12 @@ pub struct DfuFileChecks {
 /// State of the device update operations
 #[derive(Default)]
 pub struct DeviceUpdateState {
+    /// Device ready flag
+    device_ready: bool,
+
+    /// File ready flag
+    file_ready: bool,
+
     /// Flag if everything is ready to start
     preflight_checks_passed: bool,
 
@@ -260,6 +266,8 @@ impl epi::App for App {
             }
         }
 
+        self.device_update_state.device_ready = self.device_id.is_some();
+        self.device_update_state.file_ready = self.dfu_file.is_some();
         self.device_update_state.preflight_checks_passed = self.preflight_checks();
 
         // Top panel with menu
