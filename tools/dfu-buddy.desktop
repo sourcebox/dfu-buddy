@@ -1,0 +1,6 @@
+[Desktop Entry]
+Categories=Utility;
+Icon=dfu-buddy
+Name=dfu-buddy
+Type=Application
+Exec=dfu-buddy

@@ -53,6 +53,16 @@ To build a macOS application bundle, additional dependencies must be installed:
 Run `./build-mac-bundle.sh` from the project directory. Make sure the script has executable permissions.
 The bundle will be created in the `./target/release/bundle/osx` directory.
 
+### Linux AppImage (optional)
+
+To build an AppImage for Linux, additional dependencies must be installed:
+
+- [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy)
+- [linuxdeploy-plugin-appimage](https://github.com/linuxdeploy/linuxdeploy-plugin-appimage)
+
+Run `./build-linux-appimage.sh` from the project directory. Make sure the script has executable permissions.
+The AppImage will be created in the `./target/release/appimage` directory.
+
 ## License
 
 Published under the MIT license.
