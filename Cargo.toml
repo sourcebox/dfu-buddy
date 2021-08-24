@@ -1,23 +1,23 @@
 [package]
-name = "dfu-buddy"
-version = "0.1.0"
 authors = ["Oliver Rockstedt <info@sourcebox.de>"]
-edition = "2018"
 description = "DFU flash utility with GUI"
-repository = "https://github.com/sourcebox/dfu-buddy"
+edition = "2018"
 license = "MIT"
+name = "dfu-buddy"
+repository = "https://github.com/sourcebox/dfu-buddy"
+version = "0.1.0"
 
 [dependencies]
-dfufile = { git = "https://github.com/sourcebox/dfufile-rs", rev = "356184f17f380cdbad4cedff460e4cc8bc612771"}
-eframe = { git = "https://github.com/emilk/egui", rev = "52d187ab5f036e1a0fa47892bce2eba2d4ada0f0", features=["persistence"]}
-log = { version = "0.4", features = ["max_level_debug", "release_max_level_info"] }
-simple_logger = "1.11"
-serde = { version = "1", features = ["derive"], optional = true }
-rusb = { version="0.8", features=["vendored"] }
-rfd = "0.4"
+dfufile = {git = "https://github.com/sourcebox/dfufile-rs", rev = "356184f17f380cdbad4cedff460e4cc8bc612771"}
 dirs = "3.0"
+eframe = {git = "https://github.com/emilk/egui", rev = "cb566fc29589f1d8b79b02a75ccf931225564567", features = ["persistence"]}
 futures = "0.3"
+log = {version = "0.4", features = ["max_level_debug", "release_max_level_info"]}
 regex = "1.5"
+rfd = "0.4"
+rusb = {version = "0.8", features = ["vendored"]}
+serde = {version = "1", features = ["derive"], optional = true}
+simple_logger = "1.11"
 
 [features]
 default = ["persistence"]
@@ -27,6 +27,6 @@ persistence = ["eframe/persistence", "serde"]
 lto = true
 
 [package.metadata.bundle]
-name = "DFU Buddy"
 identifier = "de.sourcebox.dfu-buddy"
+name = "DFU Buddy"
 osx_minimum_system_version = "10.11"
