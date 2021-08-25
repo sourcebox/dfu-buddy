@@ -79,7 +79,7 @@ pub fn selection(
 pub fn common_info(ui: &mut egui::Ui, device_info: Option<&dfudev::DeviceInfo>) {
     ui.group(|ui| {
         ui.set_width(ui.available_width() / 3.0);
-        ui.set_height(ui.available_size().y);
+        ui.set_height(ui.available_height());
 
         match device_info {
             Some(device_info) => {
@@ -130,7 +130,7 @@ pub fn common_info(ui: &mut egui::Ui, device_info: Option<&dfudev::DeviceInfo>) 
 pub fn memory_info(ui: &mut egui::Ui, device_info: Option<&dfudev::DeviceInfo>) {
     ui.group(|ui| {
         ui.set_width(ui.available_width());
-        ui.set_height(ui.available_size().y);
+        ui.set_height(ui.available_height());
 
         match device_info {
             Some(device_info) => {
@@ -171,7 +171,7 @@ pub fn update_controls(
 ) {
     ui.vertical(|ui| {
         ui.set_width(ui.available_width() / 3.0);
-        ui.set_height(ui.available_size().y);
+        ui.set_height(ui.available_height());
 
         if update_state.error.is_some() {
             ui.vertical_centered(|ui| {
@@ -264,7 +264,7 @@ pub fn update_controls(
 pub fn update_progress(ui: &mut egui::Ui, update_state: &DeviceUpdateState) {
     ui.group(|ui| {
         ui.set_width(ui.available_width());
-        ui.set_height(ui.available_size().y);
+        ui.set_height(ui.available_height());
         ui.set_enabled(update_state.preflight_checks_passed);
 
         ui.vertical(|ui| {

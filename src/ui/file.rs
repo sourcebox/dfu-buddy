@@ -77,7 +77,7 @@ pub fn common_info(
 ) {
     ui.group(|ui| {
         ui.set_width(ui.available_width() / 12.0 * 4.0);
-        ui.set_height(ui.available_size().y);
+        ui.set_height(ui.available_height());
 
         let mut approve_vendor_id = false;
         let mut approve_product_id = false;
@@ -212,7 +212,7 @@ pub fn content_info(
 ) {
     ui.group(|ui| {
         ui.set_width(ui.available_width());
-        ui.set_height(ui.available_size().y);
+        ui.set_height(ui.available_height());
 
         match dfu_file {
             Some(dfu_file) => match &dfu_file.content {
