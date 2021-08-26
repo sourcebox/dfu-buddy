@@ -83,6 +83,9 @@ pub enum Message {
     /// Select a device with a specific id
     DeviceSelected(u64),
 
+    /// Open the file dialog
+    OpenFileDialog,
+
     /// Clear the selected file
     ClearFile,
 
@@ -278,6 +281,9 @@ impl epi::App for App {
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 egui::menu::menu(ui, "File", |ui| {
+                    if ui.button("Open...").clicked() {
+                        self.message_channel.0.send(Message::OpenFileDialog).ok();
+                    }
                     if ui.button("Quit").clicked() {
                         frame.quit();
                     }
@@ -367,6 +373,9 @@ impl App {
                 let device = self.get_selected_device().unwrap();
                 log::debug!("Selected device {}", device.info);
                 self.device_update_state = DeviceUpdateState::default();
+            }
+            Message::OpenFileDialog => {
+                self.open_file_dialog();
             }
             Message::ClearFile => {
                 self.dfu_file = None;
@@ -480,6 +489,33 @@ impl App {
             Some(device_id) => self.get_device(device_id),
             None => None,
         }
+    }
+
+    /// Open the file dialog
+    fn open_file_dialog(&mut self) {
+        let mut start_dir = dirs::home_dir().unwrap_or(std::path::PathBuf::new());
+
+        start_dir = self
+            .file_dialog_path
+            .as_ref()
+            .unwrap_or(&start_dir)
+            .to_path_buf();
+
+        let task = rfd::AsyncFileDialog::new()
+            .add_filter("DFU files", &["dfu"])
+            .set_directory(start_dir)
+            .pick_file();
+
+        let message_sender = self.message_channel.0.clone();
+
+        execute(async move {
+            let file = task.await;
+
+            if let Some(file) = file {
+                let file_path = std::path::PathBuf::from(file.path());
+                message_sender.send(Message::OpenFile(file_path)).ok();
+            }
+        });
     }
 
     /// Open a DFU file

@@ -38,28 +38,7 @@ pub fn selection(
         let open_button = ui.add(egui::widgets::Button::new("Open...").fill(egui::Color32::BLUE));
 
         if open_button.clicked() {
-            let mut start_dir = dirs::home_dir().unwrap_or(std::path::PathBuf::new());
-
-            start_dir = dialog_start_path
-                .as_ref()
-                .unwrap_or(&start_dir)
-                .to_path_buf();
-
-            let task = rfd::AsyncFileDialog::new()
-                .add_filter("DFU files", &["dfu"])
-                .set_directory(start_dir)
-                .pick_file();
-
-            let message_sender = message_sender.clone();
-
-            execute(async move {
-                let file = task.await;
-
-                if let Some(file) = file {
-                    let file_path = std::path::PathBuf::from(file.path());
-                    message_sender.send(Message::OpenFile(file_path)).ok();
-                }
-            });
+            message_sender.send(Message::OpenFileDialog).ok();
         }
 
         if ui.button("Clear").clicked() {
