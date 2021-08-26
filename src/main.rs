@@ -323,12 +323,7 @@ impl epi::App for App {
 
                 ui.add_space(5.0);
 
-                ui::file::selection(
-                    ui,
-                    &self.dfu_file,
-                    &mut self.file_dialog_path,
-                    &self.message_channel.0,
-                );
+                ui::file::selection(ui, &self.dfu_file, &self.message_channel.0);
 
                 ui.add_space(5.0);
 

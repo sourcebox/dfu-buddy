@@ -2,13 +2,12 @@
 
 use eframe::egui;
 
-use crate::{dfudev, execute, DfuFileChecks, Message};
+use crate::{dfudev, DfuFileChecks, Message};
 
 /// Show box with file selection
 pub fn selection(
     ui: &mut egui::Ui,
     selected_file: &Option<dfufile::DfuFile>,
-    dialog_start_path: &mut Option<std::path::PathBuf>,
     message_sender: &std::sync::mpsc::Sender<Message>,
 ) {
     let file_path = selected_file.as_ref().map(|file| &file.path);
