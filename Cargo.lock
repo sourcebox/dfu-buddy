@@ -502,7 +502,8 @@ dependencies = [
 [[package]]
 name = "dfufile"
 version = "0.1.0"
-source = "git+https://github.com/sourcebox/dfufile-rs?rev=356184f17f380cdbad4cedff460e4cc8bc612771#356184f17f380cdbad4cedff460e4cc8bc612771"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "551e1fe749b9bb46edc0818708c9bcc804a6e01aaa13738ce8deb448529d7729"
 
 [[package]]
 name = "directories-next"

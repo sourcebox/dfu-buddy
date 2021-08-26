@@ -8,7 +8,7 @@ repository = "https://github.com/sourcebox/dfu-buddy"
 version = "0.1.0"
 
 [dependencies]
-dfufile = {git = "https://github.com/sourcebox/dfufile-rs", rev = "356184f17f380cdbad4cedff460e4cc8bc612771"}
+dfufile = "0.1"
 dirs = "3.0"
 eframe = {git = "https://github.com/emilk/egui", rev = "a25633785699051e509edb8116da4e72350ed001", features = ["persistence"]}
 futures = "0.3"
