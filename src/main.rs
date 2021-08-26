@@ -242,11 +242,15 @@ impl epi::App for App {
 
         if args.len() > 1 {
             // First CLI argument is used as file path
-            let file_path = std::path::PathBuf::from(args.nth(1).unwrap());
-            self.message_channel
-                .0
-                .send(Message::OpenFile(file_path))
-                .ok();
+            let file_path = std::path::PathBuf::from(args.nth(1).unwrap().trim());
+            if file_path.exists() && file_path.is_file() {
+                self.message_channel
+                    .0
+                    .send(Message::OpenFile(file_path))
+                    .ok();
+            } else {
+                log::error!("File {:?} does not exist.", file_path);
+            }
         }
     }
 
