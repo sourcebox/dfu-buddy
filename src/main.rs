@@ -29,13 +29,6 @@ fn main() {
     eframe::run_native(Box::new(app), native_options);
 }
 
-/// Executes a future in a new thread
-fn execute<F: std::future::Future<Output = ()> + Send + 'static>(f: F) {
-    std::thread::spawn(move || {
-        futures::executor::block_on(f);
-    });
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 #[cfg_attr(feature = "persistence", derive(serde::Deserialize, serde::Serialize))]
@@ -496,21 +489,17 @@ impl App {
             .unwrap_or(&start_dir)
             .to_path_buf();
 
-        let task = rfd::AsyncFileDialog::new()
+        let result = rfd::FileDialog::new()
             .add_filter("DFU files", &["dfu"])
             .set_directory(start_dir)
             .pick_file();
 
-        let message_sender = self.message_channel.0.clone();
-
-        execute(async move {
-            let file = task.await;
-
-            if let Some(file) = file {
-                let file_path = std::path::PathBuf::from(file.path());
-                message_sender.send(Message::OpenFile(file_path)).ok();
-            }
-        });
+        if let Some(file_path) = result {
+            self.message_channel
+                .0
+                .send(Message::OpenFile(file_path))
+                .ok();
+        }
     }
 
     /// Open a DFU file
@@ -534,15 +523,12 @@ impl App {
             }
             Err(error) => {
                 log::error!("{}", error);
-                let task = rfd::AsyncMessageDialog::new()
+                rfd::MessageDialog::new()
                     .set_title("Error opening DFU file")
                     .set_description(format!("{}", error).as_str())
                     .set_buttons(rfd::MessageButtons::Ok)
                     .set_level(rfd::MessageLevel::Error)
                     .show();
-                execute(async {
-                    task.await;
-                });
                 self.dfu_file = None;
             }
         }
