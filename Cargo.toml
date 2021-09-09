@@ -2,6 +2,7 @@
 authors = ["Oliver Rockstedt <info@sourcebox.de>"]
 description = "DFU flash utility with GUI"
 edition = "2018"
+homepage = "https://github.com/sourcebox/dfu-buddy"
 license = "MIT"
 name = "dfu-buddy"
 repository = "https://github.com/sourcebox/dfu-buddy"
