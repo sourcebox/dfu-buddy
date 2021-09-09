@@ -579,7 +579,7 @@ checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 [[package]]
 name = "eframe"
 version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=906a798003ac301cd6733f4dbba0452c515ecb12#906a798003ac301cd6733f4dbba0452c515ecb12"
+source = "git+https://github.com/emilk/egui?rev=f37180f7dc49e155ddebd89c8f707b91eb2ea999#f37180f7dc49e155ddebd89c8f707b91eb2ea999"
 dependencies = [
  "egui",
  "egui_glium",
@@ -589,8 +589,8 @@ dependencies = [
 
 [[package]]
 name = "egui"
-version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=906a798003ac301cd6733f4dbba0452c515ecb12#906a798003ac301cd6733f4dbba0452c515ecb12"
+version = "0.14.2"
+source = "git+https://github.com/emilk/egui?rev=f37180f7dc49e155ddebd89c8f707b91eb2ea999#f37180f7dc49e155ddebd89c8f707b91eb2ea999"
 dependencies = [
  "epaint",
  "ron",
@@ -600,7 +600,7 @@ dependencies = [
 [[package]]
 name = "egui_glium"
 version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=906a798003ac301cd6733f4dbba0452c515ecb12#906a798003ac301cd6733f4dbba0452c515ecb12"
+source = "git+https://github.com/emilk/egui?rev=f37180f7dc49e155ddebd89c8f707b91eb2ea999#f37180f7dc49e155ddebd89c8f707b91eb2ea999"
 dependencies = [
  "copypasta",
  "directories-next",
@@ -614,8 +614,8 @@ dependencies = [
 
 [[package]]
 name = "egui_web"
-version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=906a798003ac301cd6733f4dbba0452c515ecb12#906a798003ac301cd6733f4dbba0452c515ecb12"
+version = "0.14.1"
+source = "git+https://github.com/emilk/egui?rev=f37180f7dc49e155ddebd89c8f707b91eb2ea999#f37180f7dc49e155ddebd89c8f707b91eb2ea999"
 dependencies = [
  "egui",
  "epi",
@@ -636,7 +636,7 @@ checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
 [[package]]
 name = "emath"
 version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=906a798003ac301cd6733f4dbba0452c515ecb12#906a798003ac301cd6733f4dbba0452c515ecb12"
+source = "git+https://github.com/emilk/egui?rev=f37180f7dc49e155ddebd89c8f707b91eb2ea999#f37180f7dc49e155ddebd89c8f707b91eb2ea999"
 dependencies = [
  "serde",
 ]
@@ -644,20 +644,20 @@ dependencies = [
 [[package]]
 name = "epaint"
 version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=906a798003ac301cd6733f4dbba0452c515ecb12#906a798003ac301cd6733f4dbba0452c515ecb12"
+source = "git+https://github.com/emilk/egui?rev=f37180f7dc49e155ddebd89c8f707b91eb2ea999#f37180f7dc49e155ddebd89c8f707b91eb2ea999"
 dependencies = [
  "ab_glyph",
  "ahash",
  "atomic_refcell",
  "emath",
- "ordered-float",
+ "nohash-hasher",
  "serde",
 ]
 
 [[package]]
 name = "epi"
 version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=906a798003ac301cd6733f4dbba0452c515ecb12#906a798003ac301cd6733f4dbba0452c515ecb12"
+source = "git+https://github.com/emilk/egui?rev=f37180f7dc49e155ddebd89c8f707b91eb2ea999#f37180f7dc49e155ddebd89c8f707b91eb2ea999"
 dependencies = [
  "egui",
  "ron",
@@ -1279,6 +1279,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "nohash-hasher"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2bf50223579dc7cdcfb3bfcacf7069ff68243f8c363f62ffa99cf000a6b9c451"
+
+[[package]]
 name = "nom"
 version = "7.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1382,15 +1388,6 @@ name = "once_cell"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "692fcb63b64b1758029e0a96ee63e049ce8c5948587f2f7208df04625e5f6b56"
-
-[[package]]
-name = "ordered-float"
-version = "2.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "039f02eb0f69271f26abe3202189275d7aa2258b903cb0281b5de710a2570ff3"
-dependencies = [
- "num-traits",
-]
 
 [[package]]
 name = "osmesa-sys"
