@@ -19,6 +19,9 @@ rusb = {version = "0.8", features = ["vendored"]}
 serde = {version = "1", features = ["derive"], optional = true}
 simple_logger = "1.11"
 
+[patch.crates-io]
+winit = {git = "https://github.com/PolyMeilex/winit ", branch = "master"}
+
 [features]
 default = ["persistence"]
 persistence = ["eframe/persistence", "serde"]
