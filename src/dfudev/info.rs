@@ -83,7 +83,8 @@ pub fn info(
                         alt_settings.push((interface_desc.setting_number(), interface_string));
 
                         // Extra bytes contain the DFU functional descriptor
-                        if let Some(extra) = interface_desc.extra() {
+                        if !interface_desc.extra().is_empty() {
+                            let extra = interface_desc.extra();
                             if extra.len() == 9 && extra[0] == 9 && extra[1] == 0x21 {
                                 let func_desc = DfuFunctionalDescriptor::from_bytes(extra);
                                 dfu_attributes = func_desc.bmAttributes;

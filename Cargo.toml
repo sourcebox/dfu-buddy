@@ -15,13 +15,13 @@ eframe = {git = "https://github.com/emilk/egui", rev = "f37180f7dc49e155ddebd89c
 futures = "0.3"
 log = {version = "0.4", features = ["max_level_debug", "release_max_level_info"]}
 regex = "1.5"
-rfd = "0.4"
-rusb = {version = "0.8", features = ["vendored"]}
+rfd = "0.5"
+rusb = {version = "0.9", features = ["vendored"]}
 serde = {version = "1", features = ["derive"], optional = true}
 simple_logger = "1.11"
 
 [patch.crates-io]
-winit = {git = "https://github.com/PolyMeilex/winit ", branch = "master"}
+winit = {git = "https://github.com/PolyMeilex/winit", branch = "master"}
 
 [features]
 default = ["persistence"]
