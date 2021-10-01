@@ -1,0 +1,27 @@
+name: Build Windows
+
+on:
+  workflow_dispatch
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    env:
+      PROJECT_NAME: ${{ github.event.repository.name }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build
+      run: cargo build --release
+
+    - name: Archive .exe
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.PROJECT_NAME }}-x86_64-pc-windows-msvc
+        path: target/release/*.exe

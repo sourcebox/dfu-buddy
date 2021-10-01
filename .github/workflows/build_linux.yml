@@ -1,0 +1,51 @@
+name: Build Linux
+
+on:
+  workflow_dispatch
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+
+    env:
+      PROJECT_NAME: ${{ github.event.repository.name }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Requirements
+      run: |
+        export DEBIAN_FRONTED=noninteractive
+        sudo apt-get -qq update
+        sudo apt-get install libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
+        sudo apt-get install libasound2-dev
+
+    - name: Install LinuxDeploy
+      uses: miurahr/install-linuxdeploy-action@v1
+      with:
+        plugins: appimage
+
+    - name: Install cargo-deb
+      run: cargo install cargo-deb
+
+    - name: Build AppImage
+      run: ./build-linux-appimage.sh
+
+    - name: Archive AppImage
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.PROJECT_NAME }}-x86_64.AppImage
+        path: target/release/appimage/*.AppImage
+
+    - name: Pack .deb package
+      run: cargo deb --no-build
+
+    - name: Archive .deb package
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.PROJECT_NAME }}-x86_64.deb
+        path: target/debian/*.deb

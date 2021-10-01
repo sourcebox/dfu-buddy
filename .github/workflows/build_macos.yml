@@ -1,0 +1,30 @@
+name: Build macOS
+
+on:
+  workflow_dispatch
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: macos-10.15
+
+    env:
+      PROJECT_NAME: ${{ github.event.repository.name }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install cargo-bundle
+      run: cargo install cargo-bundle
+
+    - name: Build DMG
+      run: ./build-mac-bundle.sh
+
+    - name: Archive DMG
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.PROJECT_NAME }}-x86_64.dmg
+        path: target/release/bundle/osx/*.dmg

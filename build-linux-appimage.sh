@@ -12,4 +12,4 @@ linuxdeploy-x86_64.AppImage \
     --output appimage
 
 echo "Moving appimage to target directory"
-mv *.AppImage ./target/release/appimage/
+mv *.AppImage ./target/release/appimage/dfu-buddy-x86_64.AppImage
