@@ -11,7 +11,7 @@ version = "0.1.0"
 [dependencies]
 dfufile = "0.1"
 dirs = "3.0"
-eframe = {git = "https://github.com/emilk/egui", rev = "f37180f7dc49e155ddebd89c8f707b91eb2ea999", features = ["persistence"]}
+eframe = {git = "https://github.com/emilk/egui", rev = "76cdbe2cf8ebb946377c51f4545b27033d335096", features = ["persistence"]}
 futures = "0.3"
 log = {version = "0.4", features = ["max_level_debug", "release_max_level_info"]}
 regex = "1.5"
