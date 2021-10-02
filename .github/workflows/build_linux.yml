@@ -23,11 +23,12 @@ jobs:
         sudo apt-get -qq update
         sudo apt-get install -y libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
         sudo apt-get install -y libgtk-3-dev
+        sudo apt-get install -y patchelf librsvg2-dev
 
     - name: Install LinuxDeploy
       uses: miurahr/install-linuxdeploy-action@v1
       with:
-        plugins: appimage
+        plugins: appimage gtk
 
     - name: Install cargo-deb
       run: cargo install cargo-deb

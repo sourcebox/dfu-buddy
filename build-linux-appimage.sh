@@ -9,6 +9,7 @@ linuxdeploy-x86_64.AppImage \
     --desktop-file ./tools/dfu-buddy.desktop \
     --icon-file ./tools/dfu-buddy.png \
     --appdir ./target/release/appimage/AppDir \
+    --plugin gtk \
     --output appimage
 
 echo "Moving appimage to target directory"
