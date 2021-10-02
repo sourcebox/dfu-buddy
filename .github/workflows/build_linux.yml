@@ -22,7 +22,7 @@ jobs:
         export DEBIAN_FRONTED=noninteractive
         sudo apt-get -qq update
         sudo apt-get install -y libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
-        sudo apt-get install -y libpango-1.0-0
+        sudo apt-get install -y libpango-1.0-0 libpango1.0-dev
 
     - name: Install LinuxDeploy
       uses: miurahr/install-linuxdeploy-action@v1
