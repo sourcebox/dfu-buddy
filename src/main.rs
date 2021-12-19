@@ -16,6 +16,7 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 /// Starts the application
 fn main() {
     SimpleLogger::new()
+        .with_utc_timestamps()
         .with_level(log::LevelFilter::Debug)
         .init()
         .unwrap();

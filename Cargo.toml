@@ -18,7 +18,7 @@ regex = "1.5"
 rfd = "0.5"
 rusb = {version = "0.9", features = ["vendored"]}
 serde = {version = "1", features = ["derive"], optional = true}
-simple_logger = "1.11"
+simple_logger = {version = "1.16", features = ["colors", "timestamps", "threads"]}
 
 [patch.crates-io]
 winit = {git = "https://github.com/PolyMeilex/winit", branch = "master"}
