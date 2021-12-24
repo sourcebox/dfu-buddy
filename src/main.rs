@@ -274,7 +274,7 @@ impl epi::App for App {
         // Top panel with menu
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
-                egui::menu::menu(ui, "File", |ui| {
+                egui::menu::menu_button(ui, "File", |ui| {
                     if ui.button("Open...").clicked() {
                         self.message_channel.0.send(Message::OpenFileDialog).ok();
                     }

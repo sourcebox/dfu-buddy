@@ -11,17 +11,14 @@ version = "0.1.0"
 [dependencies]
 dfufile = "0.1"
 dirs = "4.0"
-eframe = {git = "https://github.com/emilk/egui", rev = "76cdbe2cf8ebb946377c51f4545b27033d335096", features = ["persistence"]}
+eframe = {git = "https://github.com/emilk/egui", rev = "c69fe941afdea5ef6f3f84ed063554500b6262e8", features = ["persistence"]}
 futures = "0.3"
 log = {version = "0.4", features = ["max_level_debug", "release_max_level_info"]}
 regex = "1.5"
-rfd = "0.5"
+rfd = "0.6"
 rusb = {version = "0.9", features = ["vendored"]}
 serde = {version = "1", features = ["derive"], optional = true}
 simple_logger = {version = "1.16", features = ["colors", "timestamps", "threads"]}
-
-[patch.crates-io]
-winit = {git = "https://github.com/PolyMeilex/winit", branch = "master"}
 
 [features]
 default = ["persistence"]
