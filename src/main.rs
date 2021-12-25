@@ -11,6 +11,9 @@ use ui::{device, file};
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
+/// Size of the native application window
+const WINDOW_SIZE: egui::Vec2 = egui::vec2(750.0, 505.0);
+
 ////////////////////////////////////////////////////////////////////////////////
 
 /// Starts the application
@@ -23,7 +26,7 @@ fn main() {
 
     let app = App::default();
     let native_options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(750.0, 505.0)),
+        initial_window_size: Some(WINDOW_SIZE),
         resizable: false,
         drag_and_drop_support: true,
         ..eframe::NativeOptions::default()
@@ -65,6 +68,10 @@ pub struct App {
     /// Device update state
     #[serde(skip)]
     device_update_state: DeviceUpdateState,
+
+    /// Frame count, incremented on each update() call
+    #[serde(skip)]
+    frame_count: u64,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -200,6 +207,7 @@ impl Default for App {
             dfu_file_checks: DfuFileChecks::default(),
             message_channel: std::sync::mpsc::channel(),
             device_update_state: DeviceUpdateState::default(),
+            frame_count: 0,
         }
     }
 }
@@ -266,6 +274,11 @@ impl epi::App for App {
                     break;
                 }
             }
+        }
+
+        if self.frame_count == 0 {
+            // Set window size on first frame
+            frame.set_window_size(WINDOW_SIZE);
         }
 
         self.device_update_state.device_ready = self.device_id.is_some();
@@ -382,6 +395,8 @@ impl epi::App for App {
                 }
             }
         }
+
+        self.frame_count += 1;
     }
 }
 
