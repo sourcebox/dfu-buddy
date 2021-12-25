@@ -33,37 +33,37 @@ fn main() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#[cfg_attr(feature = "persistence", derive(serde::Deserialize, serde::Serialize))]
-#[cfg_attr(feature = "persistence", serde(default))]
+#[derive(serde::Deserialize, serde::Serialize)]
+#[serde(default)]
 pub struct App {
     /// Vector of all availables DFU devices
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     devices: Option<Vec<dfudev::DfuDevice>>,
 
     /// Id of currently selected DFU device
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     device_id: Option<u64>,
 
     /// Instance of currently opened DFU file
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     dfu_file: Option<dfufile::DfuFile>,
 
     /// DFU files checks
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     dfu_file_checks: DfuFileChecks,
 
     /// Last path shown in the open file dialog
     file_dialog_path: Option<std::path::PathBuf>,
 
     /// Message channel
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     message_channel: (
         std::sync::mpsc::Sender<Message>,
         std::sync::mpsc::Receiver<Message>,
     ),
 
     /// Device update state
-    #[cfg_attr(feature = "persistence", serde(skip))]
+    #[serde(skip)]
     device_update_state: DeviceUpdateState,
 }
 
