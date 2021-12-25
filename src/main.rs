@@ -25,6 +25,7 @@ fn main() {
     let native_options = eframe::NativeOptions {
         initial_window_size: Some(egui::vec2(750.0, 505.0)),
         resizable: false,
+        drag_and_drop_support: true,
         ..eframe::NativeOptions::default()
     };
     eframe::run_native(Box::new(app), native_options);
@@ -349,6 +350,38 @@ impl epi::App for App {
                 device::update_progress(ui, &self.device_update_state);
             });
         });
+
+        // File drag-and-drop
+        if !self.device_update_state.running {
+            if !ctx.input().raw.hovered_files.is_empty() {
+                let painter = ctx.layer_painter(egui::LayerId::new(
+                    egui::Order::Foreground,
+                    egui::Id::new("file_drop_target"),
+                ));
+
+                let screen_rect = ctx.input().screen_rect();
+                painter.rect_filled(screen_rect, 0.0, egui::Color32::from_black_alpha(192));
+                painter.text(
+                    screen_rect.center(),
+                    egui::Align2::CENTER_CENTER,
+                    "Drop DFU file top open.",
+                    egui::TextStyle::Heading,
+                    egui::Color32::YELLOW,
+                );
+            }
+
+            if !ctx.input().raw.dropped_files.is_empty() {
+                for file in &ctx.input().raw.dropped_files {
+                    if let Some(path) = &file.path {
+                        self.message_channel
+                            .0
+                            .send(Message::OpenFile(path.clone()))
+                            .ok();
+                        break;
+                    }
+                }
+            }
+        }
     }
 }
 
