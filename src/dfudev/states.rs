@@ -88,7 +88,7 @@ impl DeviceStatusCode {
     }
 
     /// Converts a status code to a byte value
-    pub fn to_byte(&self) -> u8 {
+    pub fn as_byte(&self) -> u8 {
         *self as u8
     }
 }
@@ -158,7 +158,7 @@ impl DeviceStateCode {
     }
 
     /// Converts a state code to a byte value
-    pub fn to_byte(&self) -> u8 {
+    pub fn as_byte(&self) -> u8 {
         *self as u8
     }
 }

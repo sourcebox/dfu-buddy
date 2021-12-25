@@ -265,15 +265,8 @@ impl epi::App for App {
         // Continuous run mode is required for message processing
         ctx.request_repaint();
 
-        loop {
-            match self.message_channel.1.try_recv() {
-                Ok(message) => {
-                    self.process_message(&message);
-                }
-                Err(_) => {
-                    break;
-                }
-            }
+        while let Ok(message) = self.message_channel.1.try_recv() {
+            self.process_message(&message);
         }
 
         if self.frame_count == 0 {
@@ -533,7 +526,7 @@ impl App {
 
     /// Open the file dialog
     fn open_file_dialog(&mut self) {
-        let mut start_dir = dirs::home_dir().unwrap_or(std::path::PathBuf::new());
+        let mut start_dir = dirs::home_dir().unwrap_or_default();
 
         start_dir = self
             .file_dialog_path

@@ -363,7 +363,7 @@ fn verify_device(
                             )?;
 
                             if device_data != file_data {
-                                return Err(Box::new(Error::VerifyError(read_address)));
+                                return Err(Box::new(Error::VerificationFailed(read_address)));
                             }
 
                             let progress = (block_no as f32) / (num_blocks as f32)
@@ -404,7 +404,7 @@ pub enum Error {
     MemoryRegionNotFound(u32, u32),
 
     /// Verification error
-    VerifyError(u32),
+    VerificationFailed(u32),
 
     /// Plain DFU is not supported yet
     PlainDfuNotSupported,
@@ -424,7 +424,7 @@ impl std::fmt::Display for Error {
                     "No memory region found with address 0x{:08X}..0x{:08X}",
                     start_address, end_address
                 ),
-                Self::VerifyError(address) =>
+                Self::VerificationFailed(address) =>
                     format!("Verification failed at address 0x{:08X}.", address),
                 Self::PlainDfuNotSupported => "Plain DFU devices are not supported yet".to_string(),
             }
