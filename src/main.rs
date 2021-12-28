@@ -218,7 +218,6 @@ impl epi::App for App {
     }
 
     /// Called by the frame work to save state before shutdown
-    #[cfg(feature = "persistence")]
     fn save(&mut self, storage: &mut dyn epi::Storage) {
         epi::set_value(storage, epi::APP_KEY, self);
     }
