@@ -226,7 +226,7 @@ impl epi::App for App {
     fn setup(
         &mut self,
         ctx: &egui::CtxRef,
-        _frame: &mut epi::Frame<'_>,
+        _frame: &epi::Frame,
         storage: Option<&dyn epi::Storage>,
     ) {
         if let Some(storage) = storage {
@@ -260,7 +260,7 @@ impl epi::App for App {
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
-    fn update(&mut self, ctx: &egui::CtxRef, frame: &mut epi::Frame<'_>) {
+    fn update(&mut self, ctx: &egui::CtxRef, frame: &epi::Frame) {
         // Continuous run mode is required for message processing
         ctx.request_repaint();
 
