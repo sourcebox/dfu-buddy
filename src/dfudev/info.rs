@@ -47,13 +47,13 @@ pub fn info(
 
     let manufacturer_string = handle
         .read_manufacturer_string(language, &device_desc, TIMEOUT)
-        .unwrap_or(String::new());
+        .unwrap_or_default();
     let product_string = handle
         .read_product_string(language, &device_desc, TIMEOUT)
-        .unwrap_or(String::new());
+        .unwrap_or_default();
     let serial_number_string = handle
         .read_serial_number_string(language, &device_desc, TIMEOUT)
-        .unwrap_or(String::new());
+        .unwrap_or_default();
 
     let mut alt_settings = Vec::<(u8, String)>::new();
 

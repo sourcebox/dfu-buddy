@@ -212,52 +212,49 @@ pub fn update_controls(
                     *update_state = DeviceUpdateState::default();
                 };
             });
-        } else {
-            if update_state.device_ready && update_state.file_ready {
-                if update_state.preflight_checks_passed {
-                    ui.vertical_centered(|ui| {
-                        ui.add_space(5.0);
-                        ui.add(egui::Label::new(
-                            egui::RichText::new("Warning! All data on device will be erased!")
-                                .color(egui::Color32::YELLOW),
-                        ));
-                        ui.add_space(10.0);
+        } else if update_state.device_ready && update_state.file_ready {
+            if update_state.preflight_checks_passed {
+                ui.vertical_centered(|ui| {
+                    ui.add_space(5.0);
+                    ui.add(egui::Label::new(
+                        egui::RichText::new("Warning! All data on device will be erased!")
+                            .color(egui::Color32::YELLOW),
+                    ));
+                    ui.add_space(10.0);
 
-                        ui.checkbox(&mut update_state.confirmed, "Confirm to proceed.");
+                    ui.checkbox(&mut update_state.confirmed, "Confirm to proceed.");
 
-                        ui.add_space(10.0);
+                    ui.add_space(10.0);
 
-                        ui.scope(|ui| {
-                            ui.set_enabled(update_state.confirmed);
-                            let update_button = ui.add(
-                                egui::widgets::Button::new("Start update")
-                                    .fill(egui::Color32::BLUE),
-                            );
+                    ui.scope(|ui| {
+                        ui.set_enabled(update_state.confirmed);
+                        let update_button = ui.add(
+                            egui::widgets::Button::new("Start update").fill(egui::Color32::BLUE),
+                        );
 
-                            if update_button.clicked() {
-                                message_sender.send(Message::StartUpdate).ok();
-                                update_state.confirmed = false;
-                            };
-                        });
+                        if update_button.clicked() {
+                            message_sender.send(Message::StartUpdate).ok();
+                            update_state.confirmed = false;
+                        };
                     });
-                } else {
-                    ui.centered_and_justified(|ui| {
-                        ui.add(egui::Label::new(
-                            egui::RichText::new(
-                                "Some requirements are not met.\nPlease check your settings.",
-                            )
-                            .color(egui::Color32::RED),
-                        ));
-                    });
-                }
+                });
             } else {
                 ui.centered_and_justified(|ui| {
                     ui.add(egui::Label::new(
-                        egui::RichText::new("Please select a device and open a file.")
-                            .color(egui::Color32::YELLOW),
+                        egui::RichText::new(
+                            "Some requirements are not met.\nPlease check your settings.",
+                        )
+                        .color(egui::Color32::RED),
                     ));
                 });
             }
+        } else {
+            ui.centered_and_justified(|ui| {
+                ui.add(egui::Label::new(
+                    egui::RichText::new("Please select a device and open a file.")
+                        .color(egui::Color32::YELLOW),
+                ));
+            });
         }
     });
 }

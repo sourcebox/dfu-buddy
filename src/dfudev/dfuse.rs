@@ -69,8 +69,12 @@ impl MemorySegment {
                 let sector_str = sectors_str.remove(0);
                 let captures = re.captures(sector_str).unwrap();
 
-                let sector_count =
-                    u32::from_str_radix(captures.get(1).unwrap().as_str(), 10).unwrap_or_default();
+                let sector_count = captures
+                    .get(1)
+                    .unwrap()
+                    .as_str()
+                    .parse::<u32>()
+                    .unwrap_or_default();
 
                 let multiplier_str = captures.get(3).unwrap().as_str();
                 let multiplier = match multiplier_str {
@@ -78,23 +82,18 @@ impl MemorySegment {
                     "M" => 1024 * 1024,
                     _ => 1,
                 };
-                let sector_size = u32::from_str_radix(captures.get(2).unwrap().as_str(), 10)
+                let sector_size = captures
+                    .get(2)
+                    .unwrap()
+                    .as_str()
+                    .parse::<u32>()
                     .unwrap_or_default()
                     * multiplier;
 
                 let sector_type = captures.get(4).unwrap().as_str();
-                let readable = match sector_type {
-                    "a" | "c" | "e" | "g" => true,
-                    _ => false,
-                };
-                let writable = match sector_type {
-                    "d" | "e" | "f" | "g" => true,
-                    _ => false,
-                };
-                let erasable = match sector_type {
-                    "b" | "c" | "f" | "g" => true,
-                    _ => false,
-                };
+                let readable = matches!(sector_type, "a" | "c" | "e" | "g");
+                let writable = matches!(sector_type, "d" | "e" | "f" | "g");
+                let erasable = matches!(sector_type, "b" | "c" | "f" | "g");
 
                 let region = MemorySegmentRegion {
                     start_address: address,
@@ -124,7 +123,7 @@ pub fn set_address(device: &DfuDevice, address: u32) -> Result<()> {
     device.abort_request()?;
 
     // Issue the request
-    set_address_request(&device, address)?;
+    set_address_request(device, address)?;
 
     // First status response must have state dfuDNBUSY
     let status = device.getstatus_request()?;
@@ -146,7 +145,7 @@ pub fn erase_page(device: &DfuDevice, address: u32) -> Result<()> {
     device.abort_request()?;
 
     // Issue the request
-    erase_page_request(&device, address)?;
+    erase_page_request(device, address)?;
 
     // First status response must have state dfuDNBUSY
     let status = device.getstatus_request()?;

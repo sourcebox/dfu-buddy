@@ -23,7 +23,7 @@ pub fn full_update(
 /// Erase the data in the device.
 fn erase_device(
     device_id: u64,
-    file_path: &std::path::PathBuf,
+    file_path: &std::path::Path,
     message_sender: &std::sync::mpsc::Sender<Message>,
 ) -> Result<()> {
     // Set the step so UI knows it
@@ -136,7 +136,7 @@ fn erase_device(
 /// Downloads the data to the device.
 fn program_device(
     device_id: u64,
-    file_path: &std::path::PathBuf,
+    file_path: &std::path::Path,
     message_sender: &std::sync::mpsc::Sender<Message>,
 ) -> Result<()> {
     // Set the step so UI knows it
@@ -273,7 +273,7 @@ fn program_device(
 /// Verifys the data in the device.
 fn verify_device(
     device_id: u64,
-    file_path: &std::path::PathBuf,
+    file_path: &std::path::Path,
     message_sender: &std::sync::mpsc::Sender<Message>,
 ) -> Result<()> {
     // Set the step so UI knows it
