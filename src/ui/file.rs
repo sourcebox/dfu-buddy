@@ -79,10 +79,9 @@ pub fn common_info(
                         } else {
                             egui::Color32::LIGHT_GRAY
                         };
-                        let format_label = ui.add(
-                            egui::Label::new(format!("{}", dfu_file.content))
-                                .text_color(text_color),
-                        );
+                        let format_label = ui.add(egui::Label::new(
+                            egui::RichText::new(format!("{}", dfu_file.content)).color(text_color),
+                        ));
                         if device_active && !dfu_file_checks.dfu_version_valid {
                             format_label
                                 .on_hover_text("File format is not appropriate for the device");
@@ -99,9 +98,9 @@ pub fn common_info(
                         } else {
                             egui::Color32::LIGHT_GRAY
                         };
-                        let vendor_id_label = ui.add(
-                            egui::Label::new(format!("0x{:04X}", vendor_id)).text_color(text_color),
-                        );
+                        let vendor_id_label = ui.add(egui::Label::new(
+                            egui::RichText::new(format!("0x{:04X}", vendor_id)).color(text_color),
+                        ));
                         if device_active && !dfu_file_checks.vendor_id_accepted {
                             vendor_id_label
                                 .on_hover_text("Vendor id does not match the one of the device");
@@ -125,10 +124,9 @@ pub fn common_info(
                         } else {
                             egui::Color32::LIGHT_GRAY
                         };
-                        let product_id_label = ui.add(
-                            egui::Label::new(format!("0x{:04X}", product_id))
-                                .text_color(text_color),
-                        );
+                        let product_id_label = ui.add(egui::Label::new(
+                            egui::RichText::new(format!("0x{:04X}", product_id)).color(text_color),
+                        ));
                         if device_active && !dfu_file_checks.product_id_accepted {
                             product_id_label
                                 .on_hover_text("Product id does not match the one of the device");
@@ -152,10 +150,10 @@ pub fn common_info(
                         } else {
                             egui::Color32::RED
                         };
-                        let crc_label = ui.add(
-                            egui::Label::new(format!("0x{:08X}", dfu_file.suffix.dwCRC))
-                                .text_color(text_color),
-                        );
+                        let crc_label = ui.add(egui::Label::new(
+                            egui::RichText::new(format!("0x{:08X}", dfu_file.suffix.dwCRC))
+                                .color(text_color),
+                        ));
                         if !dfu_file_checks.crc_valid {
                             crc_label.on_hover_text(
                                 "Calculated CRC does not match the value stored in the file",
@@ -227,15 +225,15 @@ pub fn content_info(
                                             alt.0 == image.target_prefix.bAlternateSetting
                                         });
                                         if let Some(target) = target {
-                                            ui.add(
-                                                egui::Label::new(&target.1)
-                                                    .text_color(egui::Color32::GREEN),
-                                            );
+                                            ui.add(egui::Label::new(
+                                                egui::RichText::new(&target.1)
+                                                    .color(egui::Color32::GREEN),
+                                            ));
                                         } else {
-                                            ui.add(
-                                                egui::Label::new("Not found")
-                                                    .text_color(egui::Color32::RED),
-                                            );
+                                            ui.add(egui::Label::new(
+                                                egui::RichText::new("Not found")
+                                                    .color(egui::Color32::RED),
+                                            ));
                                         }
                                     }
                                     None => {}
