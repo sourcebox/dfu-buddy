@@ -2,6 +2,8 @@
 //!
 //! Reference: [DFU 1.1 Specification](https://www.usb.org/sites/default/files/DFU_1.1.pdf)
 
+#![allow(dead_code)]
+
 pub mod dfuse;
 pub mod info;
 pub mod states;
