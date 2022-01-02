@@ -6,6 +6,7 @@ homepage = "https://github.com/sourcebox/dfu-buddy"
 license = "MIT"
 name = "dfu-buddy"
 repository = "https://github.com/sourcebox/dfu-buddy"
+rust-version = "1.56"
 version = "0.1.0-alpha3"
 
 [dependencies]
