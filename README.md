@@ -46,7 +46,7 @@ See [separate document](BUILDING.md) for detailed instructions.
 
 ## License
 
-Published under the MIT license.
+Published under the MIT license. All contributions to this project must be provided under the same license conditions.
 
 Author: Oliver Rockstedt <info@sourcebox.de>
 
