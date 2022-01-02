@@ -219,24 +219,21 @@ pub fn content_info(
                                 });
                                 ui.label(format!("{}", image.target_prefix.dwTargetSize));
                                 ui.label(format!("{}", image.target_prefix.dwNbElements));
-                                match device_info {
-                                    Some(device_info) => {
-                                        let target = device_info.alt_settings.iter().find(|&alt| {
-                                            alt.0 == image.target_prefix.bAlternateSetting
-                                        });
-                                        if let Some(target) = target {
-                                            ui.add(egui::Label::new(
-                                                egui::RichText::new(&target.1)
-                                                    .color(egui::Color32::GREEN),
-                                            ));
-                                        } else {
-                                            ui.add(egui::Label::new(
-                                                egui::RichText::new("Not found")
-                                                    .color(egui::Color32::RED),
-                                            ));
-                                        }
+                                if let Some(device_info) = device_info {
+                                    let target = device_info.alt_settings.iter().find(|&alt| {
+                                        alt.0 == image.target_prefix.bAlternateSetting
+                                    });
+                                    if let Some(target) = target {
+                                        ui.add(egui::Label::new(
+                                            egui::RichText::new(&target.1)
+                                                .color(egui::Color32::GREEN),
+                                        ));
+                                    } else {
+                                        ui.add(egui::Label::new(
+                                            egui::RichText::new("Not found")
+                                                .color(egui::Color32::RED),
+                                        ));
                                     }
-                                    None => {}
                                 }
                                 ui.end_row();
                             }

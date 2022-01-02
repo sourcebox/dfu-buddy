@@ -547,7 +547,7 @@ impl App {
     }
 
     /// Open a DFU file
-    fn open_file(&mut self, file_path: &std::path::PathBuf) {
+    fn open_file(&mut self, file_path: &std::path::Path) {
         let dfu_file = dfufile::DfuFile::open(file_path);
 
         match dfu_file {
