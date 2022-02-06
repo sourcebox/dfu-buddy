@@ -67,10 +67,6 @@ pub struct App {
     /// Device update state
     #[serde(skip)]
     device_update_state: DeviceUpdateState,
-
-    /// Frame count, incremented on each update() call
-    #[serde(skip)]
-    frame_count: u64,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -206,7 +202,6 @@ impl Default for App {
             dfu_file_checks: DfuFileChecks::default(),
             message_channel: std::sync::mpsc::channel(),
             device_update_state: DeviceUpdateState::default(),
-            frame_count: 0,
         }
     }
 }
@@ -225,7 +220,7 @@ impl epi::App for App {
     fn setup(
         &mut self,
         ctx: &egui::CtxRef,
-        _frame: &epi::Frame,
+        frame: &epi::Frame,
         storage: Option<&dyn epi::Storage>,
     ) {
         if let Some(storage) = storage {
@@ -256,6 +251,8 @@ impl epi::App for App {
                 log::error!("File {:?} does not exist.", file_path);
             }
         }
+
+        frame.set_window_size(WINDOW_SIZE);
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
@@ -265,11 +262,6 @@ impl epi::App for App {
 
         while let Ok(message) = self.message_channel.1.try_recv() {
             self.process_message(&message);
-        }
-
-        if self.frame_count == 0 {
-            // Set window size on first frame
-            frame.set_window_size(WINDOW_SIZE);
         }
 
         self.device_update_state.device_ready = self.device_id.is_some();
@@ -386,8 +378,6 @@ impl epi::App for App {
                 }
             }
         }
-
-        self.frame_count += 1;
     }
 }
 
