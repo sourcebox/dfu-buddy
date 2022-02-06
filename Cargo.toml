@@ -19,7 +19,7 @@ regex = "1.5"
 rfd = "0.6"
 rusb = {version = "0.9"}
 serde = {version = "1", features = ["derive"]}
-simple_logger = {version = "1.16", features = ["colors", "timestamps", "threads"]}
+simple_logger = {version = "2.1"}
 
 [features]
 default = ["libusb-vendored"]
