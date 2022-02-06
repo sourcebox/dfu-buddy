@@ -16,7 +16,7 @@ eframe = {version = "0.16", features = ["persistence"]}
 futures = "0.3"
 log = {version = "0.4", features = ["max_level_debug", "release_max_level_info"]}
 regex = "1.5"
-rfd = "0.6"
+rfd = "0.7"
 rusb = {version = "0.9"}
 serde = {version = "1", features = ["derive"]}
 simple_logger = {version = "2.1"}
