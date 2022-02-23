@@ -12,7 +12,7 @@ repository = "https://github.com/sourcebox/dfu-buddy"
 [dependencies]
 dfufile = "0.1"
 dirs = "4.0"
-eframe = {version = "0.16", features = ["persistence"]}
+eframe = {version = "0.17", features = ["persistence"]}
 futures = "0.3"
 log = {version = "0.4", features = ["max_level_debug", "release_max_level_info"]}
 regex = "1.5"

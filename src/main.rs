@@ -219,7 +219,7 @@ impl epi::App for App {
     /// Called once on startup
     fn setup(
         &mut self,
-        ctx: &egui::CtxRef,
+        ctx: &egui::Context,
         frame: &epi::Frame,
         storage: Option<&dyn epi::Storage>,
     ) {
@@ -227,12 +227,14 @@ impl epi::App for App {
             *self = epi::get_value(storage, epi::APP_KEY).unwrap_or_default()
         }
 
-        let mut fonts = egui::FontDefinitions::default();
-        fonts.family_and_size.insert(
+        ctx.set_visuals(egui::Visuals::dark());
+
+        let mut style = egui::Style::default();
+        style.text_styles.insert(
             egui::TextStyle::Heading,
-            (egui::FontFamily::Proportional, 16.0),
+            egui::FontId::new(16.0, egui::FontFamily::Proportional),
         );
-        ctx.set_fonts(fonts);
+        ctx.set_style(style);
 
         log::info!("USB hotplug: {}", dfudev::has_hotplug());
         self.scan_devices();
@@ -256,7 +258,7 @@ impl epi::App for App {
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
-    fn update(&mut self, ctx: &egui::CtxRef, frame: &epi::Frame) {
+    fn update(&mut self, ctx: &egui::Context, frame: &epi::Frame) {
         // Continuous run mode is required for message processing
         ctx.request_repaint();
 
@@ -361,7 +363,7 @@ impl epi::App for App {
                     screen_rect.center(),
                     egui::Align2::CENTER_CENTER,
                     "Drop DFU file top open.",
-                    egui::TextStyle::Heading,
+                    egui::FontId::new(16.0, egui::FontFamily::Proportional),
                     egui::Color32::YELLOW,
                 );
             }
