@@ -23,14 +23,19 @@ fn main() {
         .init()
         .unwrap();
 
-    let app = App::default();
     let native_options = eframe::NativeOptions {
         initial_window_size: Some(WINDOW_SIZE),
+        min_window_size: Some(WINDOW_SIZE),
+        max_window_size: Some(WINDOW_SIZE),
         resizable: false,
         drag_and_drop_support: true,
         ..eframe::NativeOptions::default()
     };
-    eframe::run_native(Box::new(app), native_options);
+    eframe::run_native(
+        "DFU Buddy",
+        native_options,
+        Box::new(|cc| Box::new(App::new(cc))),
+    );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,6 +79,9 @@ pub struct App {
 /// Messages for application actions
 #[derive(Debug, Clone)]
 pub enum Message {
+    /// Initialization on startup
+    Init,
+
     /// Force rescanning of devices
     RescanDevices,
 
@@ -207,58 +215,13 @@ impl Default for App {
 }
 
 impl epi::App for App {
-    fn name(&self) -> &str {
-        "DFU Buddy"
-    }
-
     /// Called by the frame work to save state before shutdown
     fn save(&mut self, storage: &mut dyn epi::Storage) {
         epi::set_value(storage, epi::APP_KEY, self);
     }
 
-    /// Called once on startup
-    fn setup(
-        &mut self,
-        ctx: &egui::Context,
-        frame: &epi::Frame,
-        storage: Option<&dyn epi::Storage>,
-    ) {
-        if let Some(storage) = storage {
-            *self = epi::get_value(storage, epi::APP_KEY).unwrap_or_default()
-        }
-
-        ctx.set_visuals(egui::Visuals::dark());
-
-        let mut style = egui::Style::default();
-        style.text_styles.insert(
-            egui::TextStyle::Heading,
-            egui::FontId::new(16.0, egui::FontFamily::Proportional),
-        );
-        ctx.set_style(style);
-
-        log::info!("USB hotplug: {}", dfudev::has_hotplug());
-        self.scan_devices();
-
-        let mut args = std::env::args();
-
-        if args.len() > 1 {
-            // First CLI argument is used as file path
-            let file_path = std::path::PathBuf::from(args.nth(1).unwrap().trim());
-            if file_path.exists() && file_path.is_file() {
-                self.message_channel
-                    .0
-                    .send(Message::OpenFile(file_path))
-                    .ok();
-            } else {
-                log::error!("File {:?} does not exist.", file_path);
-            }
-        }
-
-        frame.set_window_size(WINDOW_SIZE);
-    }
-
     /// Called each time the UI needs repainting, which may be many times per second.
-    fn update(&mut self, ctx: &egui::Context, frame: &epi::Frame) {
+    fn update(&mut self, ctx: &egui::Context, frame: &mut epi::Frame) {
         // Continuous run mode is required for message processing
         ctx.request_repaint();
 
@@ -384,9 +347,51 @@ impl epi::App for App {
 }
 
 impl App {
+    /// Create the application
+    pub fn new(cc: &epi::CreationContext<'_>) -> Self {
+        let app = if let Some(storage) = cc.storage {
+            epi::get_value(storage, epi::APP_KEY).unwrap_or_default()
+        } else {
+            Self::default()
+        };
+
+        cc.egui_ctx.set_visuals(egui::Visuals::dark());
+
+        let mut style = egui::Style::default();
+        style.text_styles.insert(
+            egui::TextStyle::Heading,
+            egui::FontId::new(16.0, egui::FontFamily::Proportional),
+        );
+        cc.egui_ctx.set_style(style);
+
+        log::info!("USB hotplug: {}", dfudev::has_hotplug());
+
+        app.message_channel.0.send(Message::Init).ok();
+
+        let mut args = std::env::args();
+
+        if args.len() > 1 {
+            // First CLI argument is used as file path
+            let file_path = std::path::PathBuf::from(args.nth(1).unwrap().trim());
+            if file_path.exists() && file_path.is_file() {
+                app.message_channel
+                    .0
+                    .send(Message::OpenFile(file_path))
+                    .ok();
+            } else {
+                log::error!("File {:?} does not exist.", file_path);
+            }
+        }
+
+        app
+    }
+
     /// Process a message
     fn process_message(&mut self, message: &Message) {
         match message {
+            Message::Init => {
+                self.scan_devices();
+            }
             Message::RescanDevices => {
                 self.scan_devices();
             }
