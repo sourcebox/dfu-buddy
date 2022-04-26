@@ -243,7 +243,7 @@ impl epi::App for App {
         ctx.request_repaint();
 
         while let Ok(message) = self.message_channel.1.try_recv() {
-            self.process_message(&message);
+            self.process_message(&message, frame);
         }
 
         self.device_update_state.device_ready = self.device_id.is_some();
@@ -404,9 +404,10 @@ impl App {
     }
 
     /// Process a message
-    fn process_message(&mut self, message: &Message) {
+    fn process_message(&mut self, message: &Message, frame: &mut epi::Frame) {
         match message {
             Message::Init => {
+                frame.set_window_size(WINDOW_SIZE);
                 self.scan_devices();
             }
             Message::RescanDevices => {
