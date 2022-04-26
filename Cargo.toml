@@ -27,6 +27,7 @@ libusb-vendored = ["rusb/vendored"]
 
 [profile.release]
 lto = true
+strip = true
 
 [package.metadata.bundle]
 identifier = "de.sourcebox.dfu-buddy"
