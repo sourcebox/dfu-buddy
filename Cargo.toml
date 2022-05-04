@@ -21,8 +21,7 @@ serde = {version = "1", features = ["derive"]}
 simple_logger = {version = "2.1"}
 
 [dependencies.eframe]
-git = "https://github.com/emilk/egui"
-rev = "888cd9c3eb09b44995369aebe0034c5be01f1917"
+version = "0.18"
 features = ["persistence"]
 
 [features]
