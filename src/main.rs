@@ -258,7 +258,7 @@ impl eframe::App for App {
                         self.message_channel.0.send(Message::OpenFileDialog).ok();
                     }
                     if ui.button("Quit").clicked() {
-                        frame.quit();
+                        frame.close();
                     }
                 });
             });
@@ -269,7 +269,7 @@ impl eframe::App for App {
             ui.horizontal(|ui| {
                 ui.label(format!("v{}", &env!("CARGO_PKG_VERSION")));
                 egui::warn_if_debug_build(ui);
-                ui.with_layout(egui::Layout::right_to_left(), |ui| {
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     ui.hyperlink_to("Project homepage", env!("CARGO_PKG_HOMEPAGE"));
                 });
             });
