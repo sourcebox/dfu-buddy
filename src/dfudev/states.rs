@@ -10,7 +10,7 @@ use super::{Error, Result};
 
 /// Device status codes, see DFU 1.1 specification section 6.1.2
 #[allow(non_camel_case_types)]
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DeviceStatusCode {
     /// No error condition is present.
     OK = 0x00,
@@ -97,7 +97,7 @@ impl DeviceStatusCode {
 
 /// Device state codes, see DFU 1.1 specification section 6.1.2
 #[allow(non_camel_case_types)]
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DeviceStateCode {
     /// Device is running its normal application.
     appIDLE = 0,
