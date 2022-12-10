@@ -13,12 +13,12 @@ repository = "https://github.com/sourcebox/dfu-buddy"
 dfufile = "0.1"
 dirs = "4.0"
 futures = "0.3"
-log = {version = "0.4", features = ["max_level_debug", "release_max_level_info"]}
+log = { version = "0.4", features = ["max_level_debug", "release_max_level_info"] }
 regex = "1.5"
 rfd = "0.10"
-rusb = {version = "0.9"}
-serde = {version = "1", features = ["derive"]}
-simple_logger = {version = "2"}
+rusb = { version = "0.9" }
+serde = { version = "1", features = ["derive"] }
+simple_logger = { version = "4" }
 
 [dependencies.eframe]
 version = "0.19"
