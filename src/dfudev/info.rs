@@ -1,6 +1,8 @@
 //! Additional device info based on parsing descriptors
 
-use super::{Device, DfuFunctionalDescriptor, Error, Result, TIMEOUT};
+use anyhow::{anyhow, Result};
+
+use super::{Device, DfuFunctionalDescriptor, Error, TIMEOUT};
 
 #[derive(Debug)]
 pub struct DeviceInfo {
@@ -92,7 +94,7 @@ pub fn info(
                                 dfu_transfer_size = func_desc.wTransferSize;
                                 dfu_version = func_desc.bcdDFUVersion;
                             } else {
-                                return Err(Box::new(Error::NoDfuFunctionalDescriptor));
+                                return Err(anyhow!(Error::NoDfuFunctionalDescriptor));
                             }
                         }
                     }

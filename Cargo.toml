@@ -10,7 +10,8 @@ homepage = "https://github.com/sourcebox/dfu-buddy"
 repository = "https://github.com/sourcebox/dfu-buddy"
 
 [dependencies]
-dfufile = "0.1"
+anyhow = "1.0"
+dfufile = "0.2"
 dirs = "4.0"
 futures = "0.3"
 log = { version = "0.4", features = ["max_level_debug", "release_max_level_info"] }

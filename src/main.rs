@@ -9,8 +9,6 @@ use simple_logger::SimpleLogger;
 
 use ui::{device, file};
 
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-
 /// Size of the native application window
 const WINDOW_SIZE: egui::Vec2 = egui::vec2(750.0, 505.0);
 

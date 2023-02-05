@@ -3,7 +3,9 @@
 //! References:
 //! - ST UM0290 for string descriptors memory segments coding
 
-use super::{requests, states, DfuDevice, Error, Result, TIMEOUT};
+use anyhow::{anyhow, Result};
+
+use super::{requests, states, DfuDevice, Error, TIMEOUT};
 
 /// Command code for "Set Address Pointer"
 const CMD_SET_ADDRESS_PTR: u8 = 0x21;
@@ -128,7 +130,7 @@ pub fn set_address(device: &DfuDevice, address: u32) -> Result<()> {
     // First status response must have state dfuDNBUSY
     let status = device.getstatus_request()?;
     if status.bState != states::DeviceStateCode::dfuDNBUSY {
-        return Err(Box::new(Error::InvalidDeviceState(status.bState)));
+        return Err(anyhow!(Error::InvalidDeviceState(status.bState)));
     }
 
     device.wait_for_status_response(status.bwPollTimeout as u64)?;
@@ -150,7 +152,7 @@ pub fn erase_page(device: &DfuDevice, address: u32) -> Result<()> {
     // First status response must have state dfuDNBUSY
     let status = device.getstatus_request()?;
     if status.bState != states::DeviceStateCode::dfuDNBUSY {
-        return Err(Box::new(Error::InvalidDeviceState(status.bState)));
+        return Err(anyhow!(Error::InvalidDeviceState(status.bState)));
     }
 
     device.wait_for_status_response(status.bwPollTimeout as u64)?;

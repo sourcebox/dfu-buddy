@@ -11,17 +11,14 @@ pub mod states;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
+use anyhow::{anyhow, Result};
 pub use rusb::has_hotplug;
 use rusb::{constants, GlobalContext};
 
 pub use info::DeviceInfo;
 pub use states::{DeviceStateCode, DeviceStatusCode};
 
-////////////////////////////////////////////////////////////////////////////////
-
 pub type Device = rusb::Device<GlobalContext>;
-
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -172,7 +169,7 @@ impl DfuDevice {
 
     /// Return the device handle as result
     pub fn handle(&self) -> Result<&rusb::DeviceHandle<rusb::GlobalContext>> {
-        self.handle.as_ref().ok_or(Box::new(Error::NoDeviceHandle))
+        self.handle.as_ref().ok_or(anyhow!(Error::NoDeviceHandle))
     }
 
     /// Send a DFU_DETACH request
@@ -297,14 +294,14 @@ impl DfuDevice {
             let status = self.getstatus_request();
             if let Ok(status) = status {
                 if status.bState != states::DeviceStateCode::dfuDNLOAD_IDLE {
-                    return Err(Box::new(Error::InvalidDeviceState(status.bState)));
+                    return Err(anyhow!(Error::InvalidDeviceState(status.bState)));
                 }
                 return Ok(status);
             } else {
                 // This happens if device reports a too short bwPollTimeout
                 // Retry a few times to get around this issue
                 if retries > NUM_POLLING_RETRIES {
-                    return Err(Box::new(Error::TooManyGetStatusRetries));
+                    return Err(anyhow!(Error::TooManyGetStatusRetries));
                 }
                 retries += 1;
             }

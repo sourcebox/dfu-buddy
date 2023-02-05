@@ -4,7 +4,9 @@
 
 #![allow(dead_code)]
 
-use super::{Error, Result};
+use anyhow::{anyhow, Result};
+
+use super::Error;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -83,7 +85,7 @@ impl DeviceStatusCode {
             0x0D => Ok(Self::errPOR),
             0x0E => Ok(Self::errUNKNOWN),
             0x0F => Ok(Self::errSTALLEDPKT),
-            _ => Err(Box::new(Error::InvalidStatusCode)),
+            _ => Err(anyhow!(Error::InvalidStatusCode)),
         }
     }
 
@@ -153,7 +155,7 @@ impl DeviceStateCode {
             8 => Ok(Self::dfuMANIFEST_WAIT_RESET),
             9 => Ok(Self::dfuUPLOAD_IDLE),
             10 => Ok(Self::dfuERROR),
-            _ => Err(Box::new(Error::InvalidStateCode)),
+            _ => Err(anyhow!(Error::InvalidStateCode)),
         }
     }
 

@@ -108,6 +108,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.69"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "224afbd727c3d6e4b90103ece64b8d1b67fbb1973b1046c2281eed3f3803f800"
+
+[[package]]
 name = "arboard"
 version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -548,6 +554,7 @@ dependencies = [
 name = "dfu-buddy"
 version = "0.1.0-alpha3"
 dependencies = [
+ "anyhow",
  "dfufile",
  "dirs",
  "eframe",
@@ -562,9 +569,12 @@ dependencies = [
 
 [[package]]
 name = "dfufile"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "551e1fe749b9bb46edc0818708c9bcc804a6e01aaa13738ce8deb448529d7729"
+checksum = "539c5f1558b2171d9273647e82b14493f479f13df67e228eb6a5cdf385af3099"
+dependencies = [
+ "anyhow",
+]
 
 [[package]]
 name = "directories-next"

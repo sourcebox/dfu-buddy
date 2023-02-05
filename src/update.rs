@@ -1,6 +1,8 @@
 //! Device update operations
 
-use crate::{dfudev, DeviceUpdateStep, Message, Result};
+use anyhow::{anyhow, Result};
+
+use crate::{dfudev, DeviceUpdateStep, Message};
 
 /// Perform a full update on the device (erase, program, verify).
 ///
@@ -113,14 +115,14 @@ fn erase_device(
                                 sector_no += 1;
                             }
                         } else {
-                            return Err(Box::new(Error::MemoryRegionNotFound(
+                            return Err(anyhow!(Error::MemoryRegionNotFound(
                                 start_address,
                                 end_address,
                             )));
                         }
                     }
                 } else {
-                    return Err(Box::new(Error::TargetNotFound(alt_setting)));
+                    return Err(anyhow!(Error::TargetNotFound(alt_setting)));
                 }
             }
         }
@@ -164,7 +166,7 @@ fn program_device(
 
     match &file.content {
         dfufile::Content::Plain => {
-            return Err(Box::new(Error::PlainDfuNotSupported));
+            return Err(anyhow!(Error::PlainDfuNotSupported));
         }
         dfufile::Content::DfuSe(content) => {
             let num_images = content.images.len();
@@ -234,7 +236,7 @@ fn program_device(
                             // First status response must have state dfuDNBUSY
                             let status = device.getstatus_request()?;
                             if status.bState != dfudev::states::DeviceStateCode::dfuDNBUSY {
-                                return Err(Box::new(dfudev::Error::InvalidDeviceState(
+                                return Err(anyhow!(dfudev::Error::InvalidDeviceState(
                                     status.bState,
                                 )));
                             }
@@ -257,7 +259,7 @@ fn program_device(
                         }
                     }
                 } else {
-                    return Err(Box::new(Error::TargetNotFound(alt_setting)));
+                    return Err(anyhow!(Error::TargetNotFound(alt_setting)));
                 }
             }
         }
@@ -301,7 +303,7 @@ fn verify_device(
 
     match &file.content {
         dfufile::Content::Plain => {
-            return Err(Box::new(Error::PlainDfuNotSupported));
+            return Err(anyhow!(Error::PlainDfuNotSupported));
         }
         dfufile::Content::DfuSe(content) => {
             let num_images = content.images.len();
@@ -363,7 +365,7 @@ fn verify_device(
                             )?;
 
                             if device_data != file_data {
-                                return Err(Box::new(Error::VerificationFailed(read_address)));
+                                return Err(anyhow!(Error::VerificationFailed(read_address)));
                             }
 
                             let progress = (block_no as f32) / (num_blocks as f32)
@@ -380,7 +382,7 @@ fn verify_device(
                         }
                     }
                 } else {
-                    return Err(Box::new(Error::TargetNotFound(alt_setting)));
+                    return Err(anyhow!(Error::TargetNotFound(alt_setting)));
                 }
             }
         }
