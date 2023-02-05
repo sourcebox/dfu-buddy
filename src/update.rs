@@ -421,13 +421,13 @@ impl std::fmt::Display for Error {
             "{}",
             match self {
                 Self::TargetNotFound(alt_setting) =>
-                    format!("No target found for alt setting {}.", alt_setting),
+                    format!("No target found for alt setting {alt_setting}."),
                 Self::MemoryRegionNotFound(start_address, end_address) => format!(
-                    "No memory region found with address 0x{:08X}..0x{:08X}",
-                    start_address, end_address
+                    "No memory region found with address 0x{start_address:08X}..0x{end_address:08X}"
+                     
                 ),
                 Self::VerificationFailed(address) =>
-                    format!("Verification failed at address 0x{:08X}.", address),
+                    format!("Verification failed at address 0x{address:08X}."),
                 Self::PlainDfuNotSupported => "Plain DFU devices are not supported yet".to_string(),
             }
         )

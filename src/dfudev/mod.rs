@@ -288,7 +288,7 @@ impl DfuDevice {
 
         loop {
             // Wait the time requested by the device in status response
-            std::thread::sleep(std::time::Duration::from_millis(timeout as u64));
+            std::thread::sleep(std::time::Duration::from_millis(timeout));
 
             // Status response must have state dfuDNLOAD_IDLE
             let status = self.getstatus_request();
@@ -436,7 +436,7 @@ impl std::fmt::Display for Error {
                     "DFU functional descriptor not found.".to_string(),
                 Self::InvalidStatusCode => "Invalid status code".to_string(),
                 Self::InvalidStateCode => "Invalid state code".to_string(),
-                Self::InvalidDeviceState(state) => format!("Invalid device state {:?}", state),
+                Self::InvalidDeviceState(state) => format!("Invalid device state {state:?}"),
                 Self::TooManyGetStatusRetries => "Too many retries when polling status".to_string(),
             }
         )

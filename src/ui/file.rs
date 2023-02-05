@@ -99,7 +99,7 @@ pub fn common_info(
                             egui::Color32::LIGHT_GRAY
                         };
                         let vendor_id_label = ui.add(egui::Label::new(
-                            egui::RichText::new(format!("0x{:04X}", vendor_id)).color(text_color),
+                            egui::RichText::new(format!("0x{vendor_id:04X}")).color(text_color),
                         ));
                         if device_active && !dfu_file_checks.vendor_id_accepted {
                             vendor_id_label
@@ -125,7 +125,7 @@ pub fn common_info(
                             egui::Color32::LIGHT_GRAY
                         };
                         let product_id_label = ui.add(egui::Label::new(
-                            egui::RichText::new(format!("0x{:04X}", product_id)).color(text_color),
+                            egui::RichText::new(format!("0x{product_id:04X}")).color(text_color),
                         ));
                         if device_active && !dfu_file_checks.product_id_accepted {
                             product_id_label

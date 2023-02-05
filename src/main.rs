@@ -475,7 +475,7 @@ impl App {
                             Ok(_) => {}
                             Err(error) => {
                                 message_sender_result
-                                    .send(Message::DeviceUpdateError(format!("{}", error)))
+                                    .send(Message::DeviceUpdateError(format!("{error}")))
                                     .ok();
                             }
                         }
@@ -581,7 +581,7 @@ impl App {
                 log::error!("{}", error);
                 rfd::MessageDialog::new()
                     .set_title("Error opening DFU file")
-                    .set_description(format!("{}", error).as_str())
+                    .set_description(format!("{error}").as_str())
                     .set_buttons(rfd::MessageButtons::Ok)
                     .set_level(rfd::MessageLevel::Error)
                     .show();
