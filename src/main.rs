@@ -36,7 +36,8 @@ fn main() {
         "DFU Buddy",
         native_options,
         Box::new(|cc| Box::new(App::new(cc))),
-    );
+    )
+    .ok();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -329,13 +330,13 @@ impl eframe::App for App {
 
         // File drag-and-drop
         if !self.device_update_state.running {
-            if !ctx.input().raw.hovered_files.is_empty() {
+            if !ctx.input(|i| i.raw.hovered_files.is_empty()) {
                 let painter = ctx.layer_painter(egui::LayerId::new(
                     egui::Order::Foreground,
                     egui::Id::new("file_drop_target"),
                 ));
 
-                let screen_rect = ctx.input().screen_rect();
+                let screen_rect = ctx.input(|i| i.screen_rect());
                 painter.rect_filled(screen_rect, 0.0, egui::Color32::from_black_alpha(192));
                 painter.text(
                     screen_rect.center(),
@@ -346,8 +347,9 @@ impl eframe::App for App {
                 );
             }
 
-            if !ctx.input().raw.dropped_files.is_empty() {
-                for file in &ctx.input().raw.dropped_files {
+            if !ctx.input(|i| i.raw.dropped_files.is_empty()) {
+                let dropped_files = ctx.input(|i| i.raw.dropped_files.clone());
+                for file in &dropped_files {
                     if let Some(path) = &file.path {
                         self.message_channel
                             .0
