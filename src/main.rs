@@ -1,4 +1,6 @@
+#![doc = include_str!("../README.md")]
 #![windows_subsystem = "windows"]
+#![warn(missing_docs)]
 
 mod dfudev;
 mod ui;
@@ -42,6 +44,7 @@ fn main() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/// Main application struct with states.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)]
 pub struct App {
