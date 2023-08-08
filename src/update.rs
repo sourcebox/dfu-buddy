@@ -188,7 +188,7 @@ fn program_device(
                         .unwrap()
                         .sector_size;
                     let transfer_size =
-                        std::cmp::min(transfer_size as u16, device.info.dfu_transfer_size);
+                        std::cmp::min(transfer_size, device.info.dfu_transfer_size as u32);
                     log::debug!(
                         "Found target \"{}\" for alt setting {}. Transfer size is {} bytes",
                         memory_segment.name,
@@ -211,11 +211,11 @@ fn program_device(
                         dfudev::dfuse::set_address(&device, write_address)?;
 
                         let mut block_no = 0;
-                        let num_blocks = (end_address - start_address) / transfer_size as u32;
+                        let num_blocks = (end_address - start_address) / transfer_size;
 
                         while write_address < end_address {
                             let chunk_size =
-                                std::cmp::min(transfer_size as u32, end_address - write_address);
+                                std::cmp::min(transfer_size, end_address - write_address);
 
                             let mut file_data = vec![0; chunk_size as usize];
                             element.read_at(
@@ -325,7 +325,7 @@ fn verify_device(
                         .unwrap()
                         .sector_size;
                     let transfer_size =
-                        std::cmp::min(transfer_size as u16, device.info.dfu_transfer_size);
+                        std::cmp::min(transfer_size, device.info.dfu_transfer_size as u32);
                     log::debug!(
                         "Found target \"{}\" for alt setting {}. Transfer size is {} bytes",
                         memory_segment.name,
@@ -348,11 +348,11 @@ fn verify_device(
                         dfudev::dfuse::set_address(&device, read_address)?;
 
                         let mut block_no = 0;
-                        let num_blocks = (end_address - start_address) / transfer_size as u32;
+                        let num_blocks = (end_address - start_address) / transfer_size;
 
                         while read_address < end_address {
                             let chunk_size =
-                                std::cmp::min(transfer_size as u32, end_address - read_address);
+                                std::cmp::min(transfer_size, end_address - read_address);
 
                             let mut device_data = vec![0; chunk_size as usize];
                             device.upload_request(block_no + 2, &mut device_data)?;
