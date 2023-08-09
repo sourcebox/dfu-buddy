@@ -155,9 +155,13 @@ pub fn erase_page(device: &DfuDevice, address: u32) -> Result<()> {
         return Err(anyhow!(Error::InvalidDeviceState(status.bState)));
     }
 
-    device.wait_for_status_response(status.bwPollTimeout as u64)?;
+    let res = device.wait_for_status_response(status.bwPollTimeout as u64);
 
-    Ok(())
+    match res {
+        Ok(_) => Ok(()),
+        Err(err) if is_stm32h7(device) => stm32h7_erase_workaround(device, err),
+        Err(err) => Err(err)
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -194,4 +198,28 @@ pub fn erase_page_request(device: &DfuDevice, address: u32) -> Result<()> {
     )?;
 
     Ok(())
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+fn is_stm32(device: &DfuDevice) -> bool {
+    device.info.vendor_id == 0x0483 && device.info.product_id == 0xdf11
+}
+
+fn is_stm32h7(device: &DfuDevice) -> bool {
+    is_stm32(device) && device.info.serial_number_string == "200364500000"
+}
+
+fn stm32h7_erase_workaround(device: &DfuDevice, erase_err: anyhow::Error) -> Result<()> {
+    // Workaround for STM32H7 (Rev.V ?) sector erase beyond 1MB.
+    // See: https://community.st.com/t5/stm32cubeprogrammer-mcu/weird-stm32h743zi-rev-v-usb-dfu-erase-behavior-beyond-1mb-sector/m-p/234209
+
+    if let Some(Error::InvalidDeviceState(state)) = erase_err.downcast_ref::<Error>() {
+        if *state == states::DeviceStateCode::dfuDNBUSY {
+            log::debug!("stm32h7 erase workaround");
+            let _ = device.clrstatus_request();
+            return device.clrstatus_request()
+        }
+    }
+    Err(erase_err)
 }
