@@ -140,6 +140,7 @@ pub fn memory_info(ui: &mut egui::Ui, device_info: Option<&dfudev::DeviceInfo>) 
                     ui.add_space(5.0);
 
                     egui::containers::ScrollArea::vertical().show(ui, |ui| {
+                        ui.set_width(ui.available_width());
                         egui::Grid::new("segments_info").show(ui, |ui| {
                             ui.label("ID");
                             ui.label("Name");
