@@ -14,8 +14,6 @@ pub fn selection(
     let mut device_index = 0;
 
     if devices.is_some() {
-        let selected_device = selected_device;
-
         for (index, device) in devices.as_ref().unwrap().iter().enumerate() {
             device_list.push(format!(
                 "{} | {}",
