@@ -201,43 +201,48 @@ pub fn content_info(
                     ui.vertical(|ui| {
                         ui.heading("Images");
                         ui.add_space(5.0);
-                        egui::Grid::new("file_content_info").show(ui, |ui| {
-                            ui.label("ID");
-                            ui.label("Name");
-                            ui.label("Size");
-                            ui.label("El.");
-                            if device_info.is_some() {
-                                ui.label("Target");
-                            }
-                            ui.end_row();
-
-                            for image in &content.images {
-                                ui.label(format!("{}", image.target_prefix.bAlternateSetting));
-                                ui.label(match image.target_prefix.bTargetNamed {
-                                    0 => "(unnamed)".to_string(),
-                                    _ => image.target_prefix.szTargetName.to_string(),
-                                });
-                                ui.label(format!("{}", image.target_prefix.dwTargetSize));
-                                ui.label(format!("{}", image.target_prefix.dwNbElements));
-                                if let Some(device_info) = device_info {
-                                    let target = device_info.alt_settings.iter().find(|&alt| {
-                                        alt.0 == image.target_prefix.bAlternateSetting
-                                    });
-                                    if let Some(target) = target {
-                                        ui.add(egui::Label::new(
-                                            egui::RichText::new(&target.1)
-                                                .color(egui::Color32::GREEN),
-                                        ));
-                                    } else {
-                                        ui.add(egui::Label::new(
-                                            egui::RichText::new("Not found")
-                                                .color(egui::Color32::RED),
-                                        ));
-                                    }
+                        egui::Grid::new("file_content_info")
+                            .num_columns(5)
+                            .show(ui, |ui| {
+                                ui.label("ID");
+                                ui.label("Name");
+                                ui.label("Size");
+                                ui.label("El.");
+                                if device_info.is_some() {
+                                    ui.label("Target");
                                 }
                                 ui.end_row();
-                            }
-                        });
+
+                                for image in &content.images {
+                                    ui.label(format!("{}", image.target_prefix.bAlternateSetting));
+                                    ui.label(match image.target_prefix.bTargetNamed {
+                                        0 => "(unnamed)".to_string(),
+                                        _ => image.target_prefix.szTargetName.to_string(),
+                                    });
+                                    ui.label(format!("{}", image.target_prefix.dwTargetSize));
+                                    ui.label(format!("{}", image.target_prefix.dwNbElements));
+                                    if let Some(device_info) = device_info {
+                                        let target = device_info.alt_settings.iter().find(|&alt| {
+                                            alt.0 == image.target_prefix.bAlternateSetting
+                                        });
+                                        if let Some(target) = target {
+                                            ui.add(
+                                                egui::Label::new(
+                                                    egui::RichText::new(&target.1)
+                                                        .color(egui::Color32::GREEN),
+                                                )
+                                                .truncate(true),
+                                            );
+                                        } else {
+                                            ui.add(egui::Label::new(
+                                                egui::RichText::new("Not found")
+                                                    .color(egui::Color32::RED),
+                                            ));
+                                        }
+                                    }
+                                    ui.end_row();
+                                }
+                            });
                     });
                 }
             },
