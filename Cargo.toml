@@ -18,7 +18,7 @@ log = { version = "0.4", features = [
     "max_level_debug",
     "release_max_level_info",
 ] }
-regex = "1.7"
+regex = "1.10"
 rfd = "0.12"
 rusb = { version = "0.9" }
 serde = { version = "1", features = ["derive"] }
