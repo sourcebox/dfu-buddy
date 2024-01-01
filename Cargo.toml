@@ -1,6 +1,6 @@
 [package]
 name = "dfu-buddy"
-version = "0.1.0-alpha3"
+version = "0.1.0-alpha4"
 authors = ["Oliver Rockstedt <info@sourcebox.de>"]
 license = "MIT"
 edition = "2021"

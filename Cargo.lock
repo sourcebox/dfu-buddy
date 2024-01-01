@@ -763,7 +763,7 @@ dependencies = [
 
 [[package]]
 name = "dfu-buddy"
-version = "0.1.0-alpha3"
+version = "0.1.0-alpha4"
 dependencies = [
  "anyhow",
  "dfufile",
