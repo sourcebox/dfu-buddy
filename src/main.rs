@@ -3,6 +3,7 @@
 #![warn(missing_docs)]
 
 mod dfudev;
+mod theme;
 mod ui;
 mod update;
 
@@ -14,7 +15,7 @@ use simple_logger::SimpleLogger;
 use ui::{device, file};
 
 /// Size of the native application window
-const WINDOW_SIZE: egui::Vec2 = egui::vec2(750.0, 505.0);
+const WINDOW_SIZE: egui::Vec2 = egui::vec2(850.0, 605.0);
 
 /// Max number of frames per second
 const FPS_LIMIT: u32 = 25;
@@ -40,7 +41,10 @@ fn main() {
     eframe::run_native(
         "DFU Buddy",
         native_options,
-        Box::new(|cc| Box::new(App::new(cc))),
+        Box::new(|cc| {
+            cc.egui_ctx.set_style(theme::style());
+            Box::new(App::new(cc))
+        }),
     )
     .ok();
 }
@@ -258,6 +262,7 @@ impl eframe::App for App {
 
         // Top panel with menu
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
+            ui.add_space(5.0);
             egui::menu::bar(ui, |ui| {
                 egui::menu::menu_button(ui, "File", |ui| {
                     if ui.button("Open...").clicked() {
@@ -268,10 +273,12 @@ impl eframe::App for App {
                     }
                 });
             });
+            ui.add_space(0.1);
         });
 
         // Bottom panel with app version
         egui::TopBottomPanel::bottom("bottom_panel").show(ctx, |ui| {
+            ui.add_space(5.0);
             ui.horizontal(|ui| {
                 ui.label(format!("v{}", &env!("CARGO_PKG_VERSION")));
                 egui::warn_if_debug_build(ui);
@@ -279,11 +286,14 @@ impl eframe::App for App {
                     ui.hyperlink_to("Project homepage", env!("CARGO_PKG_HOMEPAGE"));
                 });
             });
+            ui.add_space(0.5);
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.scope(|ui| {
                 ui.set_enabled(!self.device_update_state.running);
+
+                ui.add_space(5.0);
 
                 ui::device::selection(
                     ui,
@@ -295,7 +305,7 @@ impl eframe::App for App {
                 ui.add_space(5.0);
 
                 ui.horizontal(|ui| {
-                    ui.set_height(140.0);
+                    ui.set_height(160.0);
 
                     let device_info = self.get_selected_device().map(|device| &device.info);
 
@@ -310,7 +320,7 @@ impl eframe::App for App {
                 ui.add_space(5.0);
 
                 ui.horizontal(|ui| {
-                    ui.set_height(140.0);
+                    ui.set_height(160.0);
 
                     file::common_info(
                         ui,
@@ -328,7 +338,7 @@ impl eframe::App for App {
             ui.add_space(5.0);
 
             ui.horizontal(|ui| {
-                ui.set_height(85.0);
+                ui.set_height(100.0);
                 device::update_controls(ui, &mut self.device_update_state, &self.message_channel.0);
                 ui.add_space(10.0);
                 device::update_progress(ui, &self.device_update_state);
@@ -380,13 +390,6 @@ impl App {
         };
 
         cc.egui_ctx.set_visuals(egui::Visuals::dark());
-
-        let mut style = egui::Style::default();
-        style.text_styles.insert(
-            egui::TextStyle::Heading,
-            egui::FontId::new(16.0, egui::FontFamily::Proportional),
-        );
-        cc.egui_ctx.set_style(style);
 
         log::info!("USB hotplug: {}", dfudev::has_hotplug());
 

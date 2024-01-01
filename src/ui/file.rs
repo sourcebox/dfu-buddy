@@ -19,7 +19,7 @@ pub fn selection(
         });
 
         ui.group(|ui| {
-            ui.set_width(ui.available_width() - 100.0);
+            ui.set_width(ui.available_width() - 155.0);
             match file_path {
                 Some(file_path) => {
                     ui.label(
@@ -34,7 +34,8 @@ pub fn selection(
             }
         });
 
-        let open_button = ui.add(egui::widgets::Button::new("Open...").fill(egui::Color32::BLUE));
+        let open_button = ui
+            .add(egui::widgets::Button::new("Open...").fill(ui.style().visuals.selection.bg_fill));
 
         if open_button.clicked() {
             message_sender.send(Message::OpenFileDialog).ok();

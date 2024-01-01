@@ -184,8 +184,10 @@ pub fn update_controls(
                 ));
                 ui.add_space(10.0);
 
-                let continue_button =
-                    ui.add(egui::widgets::Button::new("Continue").fill(egui::Color32::BLUE));
+                let continue_button = ui.add(
+                    egui::widgets::Button::new("Continue")
+                        .fill(ui.style().visuals.selection.bg_fill),
+                );
 
                 if continue_button.clicked() {
                     update_state.error = None;
@@ -204,8 +206,10 @@ pub fn update_controls(
                 ));
                 ui.add_space(10.0);
 
-                let continue_button =
-                    ui.add(egui::widgets::Button::new("Continue").fill(egui::Color32::BLUE));
+                let continue_button = ui.add(
+                    egui::widgets::Button::new("Continue")
+                        .fill(ui.style().visuals.selection.bg_fill),
+                );
 
                 if continue_button.clicked() {
                     *update_state = DeviceUpdateState::default();
@@ -228,7 +232,8 @@ pub fn update_controls(
                     ui.scope(|ui| {
                         ui.set_enabled(update_state.confirmed);
                         let update_button = ui.add(
-                            egui::widgets::Button::new("Start update").fill(egui::Color32::BLUE),
+                            egui::widgets::Button::new("Start update")
+                                .fill(ui.style().visuals.selection.bg_fill),
                         );
 
                         if update_button.clicked() {
