@@ -39,4 +39,4 @@ strip = true
 [package.metadata.bundle]
 identifier = "de.sourcebox.dfu-buddy"
 name = "DFU Buddy"
-osx_minimum_system_version = "10.11"
+osx_minimum_system_version = "10.12"
