@@ -27,11 +27,12 @@ fn main() {
         .unwrap();
 
     let native_options = eframe::NativeOptions {
-        initial_window_size: Some(WINDOW_SIZE),
-        min_window_size: Some(WINDOW_SIZE),
-        max_window_size: Some(WINDOW_SIZE),
-        resizable: false,
-        drag_and_drop_support: true,
+        viewport: egui::ViewportBuilder::default()
+            .with_inner_size(WINDOW_SIZE)
+            .with_min_inner_size(WINDOW_SIZE)
+            .with_max_inner_size(WINDOW_SIZE)
+            .with_resizable(false)
+            .with_drag_and_drop(true),
         ..eframe::NativeOptions::default()
     };
     eframe::run_native(
@@ -236,7 +237,7 @@ impl eframe::App for App {
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
-    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         // Limit frame rate
         std::thread::sleep(self.next_frame - std::time::Instant::now());
         self.next_frame += self.frame_interval;
@@ -245,7 +246,7 @@ impl eframe::App for App {
         ctx.request_repaint();
 
         while let Ok(message) = self.message_channel.1.try_recv() {
-            self.process_message(&message, frame);
+            self.process_message(&message, ctx);
         }
 
         self.device_update_state.device_ready = self.device_id.is_some();
@@ -260,7 +261,7 @@ impl eframe::App for App {
                         self.message_channel.0.send(Message::OpenFileDialog).ok();
                     }
                     if ui.button("Quit").clicked() {
-                        frame.close();
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                     }
                 });
             });
@@ -407,10 +408,10 @@ impl App {
     }
 
     /// Process a message
-    fn process_message(&mut self, message: &Message, frame: &mut eframe::Frame) {
+    fn process_message(&mut self, message: &Message, ctx: &egui::Context) {
         match message {
             Message::Init => {
-                frame.set_window_size(WINDOW_SIZE);
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(WINDOW_SIZE));
                 self.scan_devices();
             }
             Message::RescanDevices => {
