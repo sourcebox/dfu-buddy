@@ -6,6 +6,8 @@ mod dfudev;
 mod ui;
 mod update;
 
+use std::time::Duration;
+
 use eframe::egui;
 use simple_logger::SimpleLogger;
 
@@ -82,10 +84,6 @@ pub struct App {
     /// Time interval between frames
     #[serde(skip)]
     frame_interval: std::time::Duration,
-
-    /// Timestamp of next frame
-    #[serde(skip)]
-    next_frame: std::time::Instant,
 
     /// Zoom factor.
     zoom_factor: f32,
@@ -228,7 +226,6 @@ impl Default for App {
             message_channel: std::sync::mpsc::channel(),
             device_update_state: DeviceUpdateState::default(),
             frame_interval: std::time::Duration::from_secs_f64(1.0 / FPS_LIMIT as f64),
-            next_frame: std::time::Instant::now(),
             zoom_factor: 1.0,
         }
     }
@@ -242,18 +239,14 @@ impl eframe::App for App {
 
     /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        // Limit frame rate
-        std::thread::sleep(self.next_frame - std::time::Instant::now());
-        self.next_frame += self.frame_interval;
-
         let zoom_factor = ctx.zoom_factor();
         if self.zoom_factor != zoom_factor {
             ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(WINDOW_SIZE * zoom_factor));
             self.zoom_factor = zoom_factor;
         }
 
-        // Continuous run mode is required for message processing
-        ctx.request_repaint();
+        // Continuous updates are required for message processing, but keep frame rate limited.
+        ctx.request_repaint_after(Duration::from_millis(1000 / FPS_LIMIT as u64));
 
         while let Ok(message) = self.message_channel.1.try_recv() {
             self.process_message(&message, ctx);
