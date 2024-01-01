@@ -86,6 +86,9 @@ pub struct App {
     /// Timestamp of next frame
     #[serde(skip)]
     next_frame: std::time::Instant,
+
+    /// Zoom factor.
+    zoom_factor: f32,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -226,6 +229,7 @@ impl Default for App {
             device_update_state: DeviceUpdateState::default(),
             frame_interval: std::time::Duration::from_secs_f64(1.0 / FPS_LIMIT as f64),
             next_frame: std::time::Instant::now(),
+            zoom_factor: 1.0,
         }
     }
 }
@@ -241,6 +245,12 @@ impl eframe::App for App {
         // Limit frame rate
         std::thread::sleep(self.next_frame - std::time::Instant::now());
         self.next_frame += self.frame_interval;
+
+        let zoom_factor = ctx.zoom_factor();
+        if self.zoom_factor != zoom_factor {
+            ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(WINDOW_SIZE * zoom_factor));
+            self.zoom_factor = zoom_factor;
+        }
 
         // Continuous run mode is required for message processing
         ctx.request_repaint();
