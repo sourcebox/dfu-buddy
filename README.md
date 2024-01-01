@@ -19,16 +19,16 @@ DFU Buddy is still work in progress and lacking functionality. Also, some device
 - Only the internal flash of STM32 MCUs can be programmed, no OTP, no option bytes.
 - Workarounds for specific non-compliant devices are not implemented.
 - Tests were done using the following devices:
-    - STM32L433VC internal bootloader: working
-    - STM32G474VC internal bootloader: working
-    - STM32F405RG (pyboard) internal bootloader: not working (overflow error).
+  - STM32L433VC internal bootloader: working
+  - STM32G474VC internal bootloader: working
+  - STM32F405RG (pyboard) internal bootloader: not working (overflow error).
 
 ## Usage
 
 - Download and install the package for your platform from the [releases page](https://github.com/sourcebox/dfu-buddy/releases/latest).
 - **Important**:
-    - When running Windows, a USB DFU driver suitable for your device must be installed.
-    - On Linux, make sure that you have setup the udev rules correctly. Otherwise, your user account will not have the required access permissions.
+  - When running Windows, a USB DFU driver suitable for your device must be installed.
+  - On Linux, make sure that you have setup the udev rules correctly. Otherwise, your user account will not have the required access permissions.
 - Connect the hardware device to be updated and power it up in DFU mode. Refer to the user manual of the device for specific instructions on how to enter this mode.
 - Launch the application. Depending on the platform, there may be security warnings about being from an untrusted developer or source. You have to accept these warnings or [build the application from source](BUILDING.md) yourself. This is a common issue for open source applications because they are not signed by their developers at the OS manufacturers.
 - Select the device from the *Device* dropdown menu. Please note that it may show a generic name like *STM32 Bootloader* instead of its usual brand name.
@@ -39,6 +39,9 @@ DFU Buddy is still work in progress and lacking functionality. Also, some device
 - The update procedure will now start. 3 steps are executed: erasing the old firmware, writing the new one, verifying the written data. Each steps progress is shown by bar in the lower right corner.
 - After all steps are finished, a result message is displayed.
 - Close the application and restart the device in normal mode. The new firmware should now be running.
+- The application window can be zoomed via key commands:
+  - macOS: <kbd>Cmd</kbd> + <kbd>+</kbd>,  <kbd>Cmd</kbd> + <kbd>-</kbd> and  <kbd>Cmd</kbd> + <kbd>0</kbd>.
+  - Windows/Linux: <kbd>Ctrl</kbd> + <kbd>+</kbd>,  <kbd>Ctrl</kbd> + <kbd>-</kbd> and  <kbd>Ctrl</kbd> + <kbd>0</kbd>.
 
 ## Building from Source
 
