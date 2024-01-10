@@ -5,7 +5,8 @@
 use eframe::egui::{
     epaint::Shadow,
     style::{
-        HandleShape, Interaction, Margin, ScrollStyle, Selection, Spacing, WidgetVisuals, Widgets,
+        HandleShape, Interaction, Margin, NumericColorSpace, ScrollStyle, Selection, Spacing,
+        WidgetVisuals, Widgets,
     },
     Color32, FontFamily, FontId, Rounding, Stroke, Style, TextStyle, Vec2, Visuals,
 };
@@ -220,6 +221,8 @@ pub fn style() -> Style {
             striped: false,
             slider_trailing_fill: false,
             handle_shape: HandleShape::Circle,
+            numeric_color_space: NumericColorSpace::GammaByte,
+            window_highlight_topmost: false,
         },
         animation_time: 0.083,
         explanation_tooltips: false,

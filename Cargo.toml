@@ -25,7 +25,7 @@ serde = { version = "1.0.193", features = ["derive"] }
 simple_logger = { version = "4.3.3" }
 
 [dependencies.eframe]
-version = "0.24.1"
+version = "0.25.0"
 features = ["persistence"]
 
 [features]
