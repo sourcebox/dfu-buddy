@@ -48,6 +48,7 @@ pub fn style() -> Style {
                 top: 6.0,
                 bottom: 6.0,
             },
+            menu_width: 150.0,
             indent: 18.0,
             interact_size: Vec2 { x: 40.0, y: 18.0 },
             slider_width: 100.0,
@@ -66,6 +67,8 @@ pub fn style() -> Style {
             resize_grab_radius_corner: 10.0,
             show_tooltips_only_when_still: true,
             tooltip_delay: 0.0,
+            selectable_labels: true,
+            multi_widget_text_select: true,
         },
         visuals: Visuals {
             dark_mode: true,
