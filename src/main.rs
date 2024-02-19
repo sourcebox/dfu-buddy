@@ -267,6 +267,7 @@ impl eframe::App for App {
                 egui::menu::menu_button(ui, "File", |ui| {
                     if ui.button("Open...").clicked() {
                         self.message_channel.0.send(Message::OpenFileDialog).ok();
+                        ui.close_menu();
                     }
                     if ui.button("Quit").clicked() {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Close);
