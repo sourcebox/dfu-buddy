@@ -10,6 +10,7 @@ mod update;
 use std::time::Duration;
 
 use eframe::egui;
+use egui_modal::Modal;
 use simple_logger::SimpleLogger;
 
 use ui::{device, file};
@@ -115,6 +116,14 @@ pub enum Message {
 
     /// Open a file
     OpenFile(std::path::PathBuf),
+
+    /// Open a message dialog.
+    OpenMessageDialog {
+        /// Title.
+        title: String,
+        /// Body content.
+        body: String,
+    },
 
     /// Start the update process in a separate thread
     StartUpdate,
@@ -243,6 +252,9 @@ impl eframe::App for App {
 
     /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        let mut message_dialog = Modal::new(ctx, "message_dialog");
+        message_dialog.show_dialog();
+
         let zoom_factor = ctx.zoom_factor();
         if self.zoom_factor != zoom_factor {
             ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(WINDOW_SIZE * zoom_factor));
@@ -253,7 +265,7 @@ impl eframe::App for App {
         ctx.request_repaint_after(Duration::from_millis(1000 / FPS_LIMIT as u64));
 
         while let Ok(message) = self.message_channel.1.try_recv() {
-            self.process_message(&message, ctx);
+            self.process_message(&message, ctx, &mut message_dialog);
         }
 
         self.device_update_state.device_ready = self.device_id.is_some();
@@ -415,7 +427,12 @@ impl App {
     }
 
     /// Process a message
-    fn process_message(&mut self, message: &Message, ctx: &egui::Context) {
+    fn process_message(
+        &mut self,
+        message: &Message,
+        ctx: &egui::Context,
+        message_dialog: &mut Modal,
+    ) {
         match message {
             Message::Init => {
                 ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(WINDOW_SIZE));
@@ -447,6 +464,13 @@ impl App {
                     self.file_dialog_path = Some(std::path::PathBuf::from(parent_path));
                 }
                 self.device_update_state = DeviceUpdateState::default();
+            }
+            Message::OpenMessageDialog { title, body } => {
+                message_dialog
+                    .dialog()
+                    .with_title(title)
+                    .with_body(body)
+                    .open();
             }
             Message::DeviceUpdateStarted => {
                 log::debug!("Device update started.");
@@ -592,12 +616,13 @@ impl App {
             }
             Err(error) => {
                 log::error!("{}", error);
-                rfd::MessageDialog::new()
-                    .set_title("Error opening DFU file")
-                    .set_description(format!("{error}").as_str())
-                    .set_buttons(rfd::MessageButtons::Ok)
-                    .set_level(rfd::MessageLevel::Error)
-                    .show();
+                self.message_channel
+                    .0
+                    .send(Message::OpenMessageDialog {
+                        title: "Error opening DFU file".into(),
+                        body: format!("{error}"),
+                    })
+                    .ok();
                 self.dfu_file = None;
             }
         }

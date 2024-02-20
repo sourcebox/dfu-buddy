@@ -23,6 +23,7 @@ rfd = "0.12.1"
 rusb = { version = "0.9.3" }
 serde = { version = "1.0.195", features = ["derive"] }
 simple_logger = { version = "4.3.3" }
+egui-modal = "0.3.4"
 
 [dependencies.eframe]
 version = "0.26.2"

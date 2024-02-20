@@ -914,6 +914,7 @@ dependencies = [
  "dfufile",
  "dirs",
  "eframe",
+ "egui-modal",
  "futures",
  "log",
  "regex",
@@ -1074,6 +1075,15 @@ dependencies = [
  "nohash-hasher",
  "ron",
  "serde",
+]
+
+[[package]]
+name = "egui-modal"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "da17dbe55bb1b04fd8b4624ab1b68f6ec245f44aedc90893463f8dbc70f28231"
+dependencies = [
+ "egui",
 ]
 
 [[package]]
