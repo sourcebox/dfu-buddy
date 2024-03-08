@@ -86,10 +86,6 @@ pub struct App {
     #[serde(skip)]
     device_update_state: DeviceUpdateState,
 
-    /// Time interval between frames
-    #[serde(skip)]
-    frame_interval: std::time::Duration,
-
     /// Zoom factor.
     zoom_factor: f32,
 }
@@ -238,7 +234,6 @@ impl Default for App {
             dfu_file_checks: DfuFileChecks::default(),
             message_channel: std::sync::mpsc::channel(),
             device_update_state: DeviceUpdateState::default(),
-            frame_interval: std::time::Duration::from_secs_f64(1.0 / FPS_LIMIT as f64),
             zoom_factor: 1.0,
         }
     }
