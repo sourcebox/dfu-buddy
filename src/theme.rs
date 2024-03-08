@@ -47,80 +47,47 @@ pub fn style() -> Style {
                 noninteractive: WidgetVisuals {
                     bg_fill: Color32::from_rgb(53, 47, 68),
                     weak_bg_fill: Color32::from_rgb(53, 47, 68),
-                    bg_stroke: Stroke {
-                        width: 1.0,
-                        color: Color32::from_rgb(92, 84, 112),
-                    },
+                    bg_stroke: Stroke::new(1.0, Color32::from_rgb(92, 84, 112)),
                     rounding: Rounding::same(2.0),
-                    fg_stroke: Stroke {
-                        width: 1.0,
-                        color: Color32::from_rgb(250, 240, 230),
-                    },
+                    fg_stroke: Stroke::new(1.0, Color32::from_rgb(250, 240, 230)),
                     expansion: 0.0,
                 },
                 inactive: WidgetVisuals {
                     bg_fill: Color32::from_rgb(39, 37, 45),
                     weak_bg_fill: Color32::from_rgb(44, 43, 43),
-                    bg_stroke: Stroke {
-                        width: 0.0,
-                        color: Color32::from_rgba_premultiplied(0, 0, 0, 0),
-                    },
+                    bg_stroke: Stroke::new(0.0, Color32::from_rgba_premultiplied(0, 0, 0, 0)),
                     rounding: Rounding::same(2.0),
-                    fg_stroke: Stroke {
-                        width: 1.0,
-                        color: Color32::from_gray(205),
-                    },
+                    fg_stroke: Stroke::new(1.0, Color32::from_gray(205)),
                     expansion: 0.0,
                 },
                 hovered: WidgetVisuals {
                     bg_fill: Color32::from_rgb(131, 132, 144),
                     weak_bg_fill: Color32::from_rgb(156, 154, 205),
-                    bg_stroke: Stroke {
-                        width: 1.0,
-                        color: Color32::from_gray(255),
-                    },
+                    bg_stroke: Stroke::new(1.0, Color32::from_gray(255)),
                     rounding: Rounding::same(3.0),
-                    fg_stroke: Stroke {
-                        width: 1.5,
-                        color: Color32::from_gray(245),
-                    },
+                    fg_stroke: Stroke::new(1.5, Color32::from_gray(245)),
                     expansion: 1.0,
                 },
                 active: WidgetVisuals {
                     bg_fill: Color32::from_gray(70),
                     weak_bg_fill: Color32::from_gray(70),
-                    bg_stroke: Stroke {
-                        width: 1.0,
-                        color: Color32::from_gray(255),
-                    },
+                    bg_stroke: Stroke::new(1.0, Color32::from_gray(255)),
                     rounding: Rounding::same(2.0),
-                    fg_stroke: Stroke {
-                        width: 2.0,
-                        color: Color32::from_gray(255),
-                    },
+                    fg_stroke: Stroke::new(2.0, Color32::from_gray(255)),
                     expansion: 1.0,
                 },
                 open: WidgetVisuals {
                     bg_fill: Color32::from_rgb(53, 47, 68),
                     weak_bg_fill: Color32::from_rgb(53, 47, 68),
-                    bg_stroke: Stroke {
-                        width: 1.0,
-                        color: Color32::from_gray(119),
-                    },
+                    bg_stroke: Stroke::new(1.0, Color32::from_gray(119)),
                     rounding: Rounding::same(2.0),
-                    fg_stroke: Stroke {
-                        width: 1.0,
-                        color: Color32::from_gray(229),
-                    },
+                    fg_stroke: Stroke::new(1.0, Color32::from_gray(229)),
                     expansion: 0.0,
                 },
             },
             selection: Selection {
                 bg_fill: Color32::from_rgb(139, 127, 218),
-                stroke: Stroke {
-                    width: 1.0,
-                    color: Color32::from_gray(255),
-                },
+                stroke: Stroke::new(1.0, Color32::from_gray(255)),
             },
             hyperlink_color: Color32::from_rgb(156, 154, 205),
             faint_bg_color: Color32::from_rgba_premultiplied(2, 2, 2, 0),
@@ -131,19 +98,13 @@ pub fn style() -> Style {
                 color: Color32::from_rgba_premultiplied(0, 0, 0, 96),
             },
             window_fill: Color32::from_gray(30),
-            window_stroke: Stroke {
-                width: 1.0,
-                color: Color32::from_gray(38),
-            },
+            window_stroke: Stroke::new(1.0, Color32::from_gray(38)),
             panel_fill: Color32::from_gray(27),
             popup_shadow: Shadow {
                 extrusion: 16.0,
                 color: Color32::from_gray(0),
             },
-            text_cursor: Stroke {
-                width: 2.0,
-                color: Color32::from_gray(255),
-            },
+            text_cursor: Stroke::new(2.0, Color32::from_gray(255)),
             ..Default::default()
         },
         ..Default::default()
