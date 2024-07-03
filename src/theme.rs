@@ -4,8 +4,8 @@
 
 use eframe::egui::{
     epaint::Shadow,
-    style::{Interaction, Margin, Selection, Spacing, WidgetVisuals, Widgets},
-    Color32, FontFamily, FontId, Rounding, Stroke, Style, TextStyle, Visuals,
+    style::{Interaction, Selection, Spacing, WidgetVisuals, Widgets},
+    Color32, FontFamily, FontId, Margin, Rounding, Stroke, Style, TextStyle, Visuals,
 };
 use eframe::emath::vec2;
 
@@ -94,15 +94,17 @@ pub fn style() -> Style {
             extreme_bg_color: Color32::from_rgb(26, 25, 25),
             window_rounding: Rounding::same(0.0),
             window_shadow: Shadow {
-                extrusion: 32.0,
+                offset: vec2(32.0, 32.0),
                 color: Color32::from_rgba_premultiplied(0, 0, 0, 96),
+                ..Default::default()
             },
             window_fill: Color32::from_gray(30),
             window_stroke: Stroke::new(1.0, Color32::from_gray(38)),
             panel_fill: Color32::from_gray(27),
             popup_shadow: Shadow {
-                extrusion: 16.0,
+                offset: vec2(16.0, 16.0),
                 color: Color32::from_gray(0),
+                ..Default::default()
             },
             text_cursor: Stroke::new(2.0, Color32::from_gray(255)),
             ..Default::default()
