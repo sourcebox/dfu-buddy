@@ -44,7 +44,7 @@ fn main() {
         native_options,
         Box::new(|cc| {
             cc.egui_ctx.set_style(theme::style());
-            Box::new(App::new(cc))
+            Ok(Box::new(App::new(cc)))
         }),
     )
     .ok();
@@ -299,7 +299,9 @@ impl eframe::App for App {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.scope(|ui| {
-                ui.set_enabled(!self.device_update_state.running);
+                if self.device_update_state.running {
+                    ui.disable();
+                }
 
                 ui.add_space(5.0);
 

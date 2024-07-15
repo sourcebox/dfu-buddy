@@ -232,7 +232,7 @@ pub fn content_info(
                                                     egui::RichText::new(&target.1)
                                                         .color(egui::Color32::GREEN),
                                                 )
-                                                .truncate(true),
+                                                .truncate(),
                                             );
                                         } else {
                                             ui.add(egui::Label::new(

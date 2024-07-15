@@ -4,7 +4,7 @@
 
 use eframe::egui::{
     epaint::Shadow,
-    style::{Interaction, Selection, Spacing, WidgetVisuals, Widgets},
+    style::{Interaction, Selection, Spacing, TextCursorStyle, WidgetVisuals, Widgets},
     Color32, FontFamily, FontId, Margin, Rounding, Stroke, Style, TextStyle, Visuals,
 };
 use eframe::emath::vec2;
@@ -106,7 +106,10 @@ pub fn style() -> Style {
                 color: Color32::from_gray(0),
                 ..Default::default()
             },
-            text_cursor: Stroke::new(2.0, Color32::from_gray(255)),
+            text_cursor: TextCursorStyle {
+                stroke: Stroke::new(2.0, Color32::from_gray(255)),
+                ..Default::default()
+            },
             ..Default::default()
         },
         ..Default::default()

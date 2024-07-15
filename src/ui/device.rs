@@ -35,7 +35,9 @@ pub fn selection(
         });
 
         ui.scope(|ui| {
-            ui.set_enabled(!device_list.is_empty());
+            if device_list.is_empty() {
+                ui.disable();
+            }
 
             let combo_box = egui::ComboBox::from_id_source("device_list")
                 .width(ui.available_width() - 100.0)
@@ -230,7 +232,9 @@ pub fn update_controls(
                     ui.add_space(10.0);
 
                     ui.scope(|ui| {
-                        ui.set_enabled(update_state.confirmed);
+                        if !update_state.confirmed {
+                            ui.disable();
+                        }
                         let update_button = ui.add(
                             egui::widgets::Button::new("Start update")
                                 .fill(ui.style().visuals.selection.bg_fill),
@@ -268,7 +272,9 @@ pub fn update_progress(ui: &mut egui::Ui, update_state: &DeviceUpdateState) {
     ui.group(|ui| {
         ui.set_width(ui.available_width());
         ui.set_height(ui.available_height());
-        ui.set_enabled(update_state.preflight_checks_passed);
+        if !update_state.preflight_checks_passed {
+            ui.disable();
+        }
 
         ui.vertical(|ui| {
             egui::Grid::new("progress_bars")
