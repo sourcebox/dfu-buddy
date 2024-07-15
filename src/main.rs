@@ -10,8 +10,8 @@ mod update;
 use std::time::Duration;
 
 use eframe::egui;
-use egui_modal::Modal;
 use simple_logger::SimpleLogger;
+use ui::modal::Modal;
 
 use ui::{device, file};
 

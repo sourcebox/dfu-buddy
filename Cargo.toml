@@ -23,7 +23,6 @@ rfd = { version = "0.14.1", default-features = false, features = ["gtk3"] }
 rusb = { version = "0.9.4" }
 serde = { version = "1.0.203", features = ["derive"] }
 simple_logger = { version = "5.0.0" }
-egui-modal = "0.3.6"
 
 [dependencies.eframe]
 version = "0.27.2"
