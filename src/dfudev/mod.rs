@@ -84,7 +84,7 @@ impl DfuDevice {
     ///
     /// - If `include_runtime` is set to `false`, only devices in DFU mode are returned
     /// - If `include_runtime` is set to `true`, also devices in runtime configuration
-    /// are returned
+    ///   are returned
     pub fn find(include_runtime: bool) -> Result<Option<Vec<Self>>> {
         let mut devices = Vec::new();
 
