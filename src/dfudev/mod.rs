@@ -61,7 +61,7 @@ pub struct DfuDevice {
     /// Unique hash based on vendor id, product id and serial
     pub id: u64,
 
-    /// Addtional info containing strings and alt settings
+    /// Additional info containing strings and alt settings
     pub info: DeviceInfo,
 
     /// Instance of rusb::Device
@@ -223,7 +223,7 @@ impl DfuDevice {
     /// Send a DFU_GETSTATUS request
     ///
     /// A `DeviceStatus` struct is returned containing the response
-    /// in a convinient format
+    /// in a convenient format
     pub fn getstatus_request(&self) -> Result<DeviceStatusResponse> {
         let mut buffer = [0; 6];
 

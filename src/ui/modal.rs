@@ -73,7 +73,7 @@ struct DialogData {
 
 /// Used for constructing and opening a modal dialog. This can be used
 /// to both set the title/body/icon of the modal and open it as a one-time call
-/// (as opposed to a continous call in the update loop) at the same time.
+/// (as opposed to a continuous call in the update loop) at the same time.
 /// Make sure to call `DialogBuilder::open` to actually open the dialog.
 #[must_use = "use `DialogBuilder::open`"]
 pub struct DialogBuilder {
@@ -295,8 +295,8 @@ impl Modal {
 
     /// If set to `true`, the modal will close itself if the user clicks outside on the modal window
     /// (onto the overlay).
-    pub fn with_close_on_outside_click(mut self, do_close_on_click_ouside: bool) -> Self {
-        self.close_on_outside_click = do_close_on_click_ouside;
+    pub fn with_close_on_outside_click(mut self, do_close_on_click_outside: bool) -> Self {
+        self.close_on_outside_click = do_close_on_click_outside;
         self
     }
 
