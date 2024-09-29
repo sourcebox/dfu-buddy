@@ -39,7 +39,7 @@ pub fn selection(
                 ui.disable();
             }
 
-            let combo_box = egui::ComboBox::from_id_source("device_list")
+            let combo_box = egui::ComboBox::from_id_salt("device_list")
                 .width(ui.available_width() - 100.0)
                 .show_index(ui, &mut device_index, device_list.len(), |i| {
                     if device_count > 0 {

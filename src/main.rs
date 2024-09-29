@@ -43,6 +43,7 @@ fn main() {
         "DFU Buddy",
         native_options,
         Box::new(|cc| {
+            cc.egui_ctx.set_theme(egui::Theme::Dark);
             cc.egui_ctx.set_style(theme::style());
             Ok(Box::new(App::new(cc)))
         }),
