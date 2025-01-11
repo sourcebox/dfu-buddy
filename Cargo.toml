@@ -10,18 +10,18 @@ homepage = "https://github.com/sourcebox/dfu-buddy"
 repository = "https://github.com/sourcebox/dfu-buddy"
 
 [dependencies]
-anyhow = "1.0.89"
+anyhow = "1.0.95"
 dfufile = "0.2.0"
 dirs = "5.0.1"
-futures = "0.3.30"
-log = { version = "0.4.22", features = [
+futures = "0.3.31"
+log = { version = "0.4.24", features = [
     "max_level_debug",
     "release_max_level_info",
 ] }
-regex = "1.10.6"
-rfd = { version = "0.15.0", default-features = false, features = ["gtk3"] }
+regex = "1.11.1"
+rfd = { version = "0.15.2", default-features = false, features = ["gtk3"] }
 rusb = { version = "0.9.4" }
-serde = { version = "1.0.210", features = ["derive"] }
+serde = { version = "1.0.217", features = ["derive"] }
 simple_logger = { version = "5.0.0" }
 
 [dependencies.eframe]
