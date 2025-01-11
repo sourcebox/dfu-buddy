@@ -289,7 +289,7 @@ pub fn update_progress(ui: &mut egui::Ui, update_state: &DeviceUpdateState) {
                                 update_state
                                     .step
                                     .as_ref()
-                                    .map_or(false, |step| *step == DeviceUpdateStep::Erase),
+                                    .is_some_and(|step| *step == DeviceUpdateStep::Erase),
                             ),
                     );
                     ui.end_row();
@@ -302,7 +302,7 @@ pub fn update_progress(ui: &mut egui::Ui, update_state: &DeviceUpdateState) {
                                 update_state
                                     .step
                                     .as_ref()
-                                    .map_or(false, |step| *step == DeviceUpdateStep::Program),
+                                    .is_some_and(|step| *step == DeviceUpdateStep::Program),
                             ),
                     );
                     ui.end_row();
@@ -315,7 +315,7 @@ pub fn update_progress(ui: &mut egui::Ui, update_state: &DeviceUpdateState) {
                                 update_state
                                     .step
                                     .as_ref()
-                                    .map_or(false, |step| *step == DeviceUpdateStep::Verify),
+                                    .is_some_and(|step| *step == DeviceUpdateStep::Verify),
                             ),
                     );
                     ui.end_row();
