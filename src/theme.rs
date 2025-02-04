@@ -5,7 +5,7 @@
 use eframe::egui::{
     epaint::Shadow,
     style::{Interaction, Selection, Spacing, TextCursorStyle, WidgetVisuals, Widgets},
-    Color32, FontFamily, FontId, Margin, Rounding, Stroke, Style, TextStyle, Visuals,
+    Color32, CornerRadius, FontFamily, FontId, Margin, Stroke, Style, TextStyle, Visuals,
 };
 use eframe::emath::vec2;
 
@@ -33,7 +33,7 @@ pub fn style() -> Style {
         .into(),
         spacing: Spacing {
             item_spacing: vec2(6.0, 6.0),
-            window_margin: Margin::same(8.0),
+            window_margin: Margin::same(8),
             button_padding: vec2(16.0, 5.0),
             icon_width: 16.0,
             ..Default::default()
@@ -48,7 +48,7 @@ pub fn style() -> Style {
                     bg_fill: Color32::from_rgb(53, 47, 68),
                     weak_bg_fill: Color32::from_rgb(53, 47, 68),
                     bg_stroke: Stroke::new(1.0, Color32::from_rgb(92, 84, 112)),
-                    rounding: Rounding::same(2.0),
+                    corner_radius: CornerRadius::same(2),
                     fg_stroke: Stroke::new(1.0, Color32::from_rgb(250, 240, 230)),
                     expansion: 0.0,
                 },
@@ -56,7 +56,7 @@ pub fn style() -> Style {
                     bg_fill: Color32::from_rgb(39, 37, 45),
                     weak_bg_fill: Color32::from_rgb(44, 43, 43),
                     bg_stroke: Stroke::new(0.0, Color32::from_rgba_premultiplied(0, 0, 0, 0)),
-                    rounding: Rounding::same(2.0),
+                    corner_radius: CornerRadius::same(2),
                     fg_stroke: Stroke::new(1.0, Color32::from_gray(205)),
                     expansion: 0.0,
                 },
@@ -64,7 +64,7 @@ pub fn style() -> Style {
                     bg_fill: Color32::from_rgb(131, 132, 144),
                     weak_bg_fill: Color32::from_rgb(156, 154, 205),
                     bg_stroke: Stroke::new(1.0, Color32::from_gray(255)),
-                    rounding: Rounding::same(3.0),
+                    corner_radius: CornerRadius::same(3),
                     fg_stroke: Stroke::new(1.5, Color32::from_gray(245)),
                     expansion: 1.0,
                 },
@@ -72,7 +72,7 @@ pub fn style() -> Style {
                     bg_fill: Color32::from_gray(70),
                     weak_bg_fill: Color32::from_gray(70),
                     bg_stroke: Stroke::new(1.0, Color32::from_gray(255)),
-                    rounding: Rounding::same(2.0),
+                    corner_radius: CornerRadius::same(2),
                     fg_stroke: Stroke::new(2.0, Color32::from_gray(255)),
                     expansion: 1.0,
                 },
@@ -80,7 +80,7 @@ pub fn style() -> Style {
                     bg_fill: Color32::from_rgb(53, 47, 68),
                     weak_bg_fill: Color32::from_rgb(53, 47, 68),
                     bg_stroke: Stroke::new(1.0, Color32::from_gray(119)),
-                    rounding: Rounding::same(2.0),
+                    corner_radius: CornerRadius::same(2),
                     fg_stroke: Stroke::new(1.0, Color32::from_gray(229)),
                     expansion: 0.0,
                 },
@@ -92,9 +92,9 @@ pub fn style() -> Style {
             hyperlink_color: Color32::from_rgb(156, 154, 205),
             faint_bg_color: Color32::from_rgba_premultiplied(2, 2, 2, 0),
             extreme_bg_color: Color32::from_rgb(26, 25, 25),
-            window_rounding: Rounding::same(0.0),
+            window_corner_radius: CornerRadius::same(0),
             window_shadow: Shadow {
-                offset: vec2(32.0, 32.0),
+                offset: [32, 32],
                 color: Color32::from_rgba_premultiplied(0, 0, 0, 96),
                 ..Default::default()
             },
@@ -102,7 +102,7 @@ pub fn style() -> Style {
             window_stroke: Stroke::new(1.0, Color32::from_gray(38)),
             panel_fill: Color32::from_gray(27),
             popup_shadow: Shadow {
-                offset: vec2(16.0, 16.0),
+                offset: [16, 16],
                 color: Color32::from_gray(0),
                 ..Default::default()
             },
