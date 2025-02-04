@@ -12,9 +12,9 @@ repository = "https://github.com/sourcebox/dfu-buddy"
 [dependencies]
 anyhow = "1.0.95"
 dfufile = "0.2.0"
-dirs = "5.0.1"
+dirs = "6.0.0"
 futures = "0.3.31"
-log = { version = "0.4.24", features = [
+log = { version = "0.4.25", features = [
     "max_level_debug",
     "release_max_level_info",
 ] }
