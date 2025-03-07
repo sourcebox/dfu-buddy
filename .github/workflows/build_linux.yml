@@ -9,7 +9,7 @@ env:
 jobs:
   build:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     env:
       PROJECT_NAME: ${{ github.event.repository.name }}
@@ -37,7 +37,7 @@ jobs:
       run: ./build-linux-appimage.sh
 
     - name: Archive AppImage
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.PROJECT_NAME }}-x86_64.AppImage
         path: target/release/appimage/*.AppImage
@@ -46,7 +46,7 @@ jobs:
       run: cargo deb --no-build
 
     - name: Archive .deb package
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.PROJECT_NAME }}-x86_64.deb
         path: target/debian/*.deb
