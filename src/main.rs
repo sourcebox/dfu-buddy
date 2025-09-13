@@ -271,11 +271,11 @@ impl eframe::App for App {
         // Top panel with menu
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.add_space(5.0);
-            egui::menu::bar(ui, |ui| {
-                egui::menu::menu_button(ui, "File", |ui| {
+            egui::MenuBar::new().ui(ui, |ui| {
+                egui::containers::menu::MenuButton::new("File").ui(ui, |ui| {
                     if ui.button("Open...").clicked() {
                         self.message_channel.0.send(Message::OpenFileDialog).ok();
-                        ui.close_menu();
+                        ui.close();
                     }
                     if ui.button("Quit").clicked() {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Close);
