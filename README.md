@@ -34,7 +34,7 @@ DFU Buddy is still work in progress and lacking functionality. Also, some device
 - Launch the application. Depending on the platform, there may be security warnings about being from an untrusted developer or source. You have to accept these warnings or [build the application from source](BUILDING.md) yourself. This is a common issue for open source applications because they are not signed by their developers at the OS manufacturers.
 - Select the device from the *Device* dropdown menu. Please note that it may show a generic name like *STM32 Bootloader* instead of its usual brand name.
 - Select the DFU file containing the firmware by either clicking the *Open...* button and choosing it via the file dialog or by dropping the file onto the application window.
-- After having selected both device and file, some checks are performed to prove that they match. This is done to prevent accidently flashing the device with a wrong firmware that is intended for some other unit.
+- After having selected both device and file, some checks are performed to prove that they match. This is done to prevent accidentally flashing the device with a wrong firmware that is intended for some other unit.
 - Check to *Confirm to proceed* checkbox in the lower left corner.
 - Press the *Start update* button to initiate to update process.
 - The update procedure will now start. 3 steps are executed: erasing the old firmware, writing the new one, verifying the written data. Each steps progress is shown by bar in the lower right corner.
