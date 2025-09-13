@@ -529,21 +529,20 @@ impl App {
 
         match devices {
             Ok(devices) => {
-                if devices.is_some() {
-                    for device in devices.as_ref().unwrap().iter() {
+                if let Some(devices) = &devices {
+                    for device in devices {
                         log::debug!("Found DFU device {}", &device.info);
                     }
-                    self.devices = devices;
                     if self.device_id.is_none() {
                         // Select the first device found
-                        self.device_id = Some(self.devices.as_ref().unwrap()[0].id);
+                        self.device_id = Some(devices[0].id);
                         self.match_file_against_device();
                     }
                 } else {
                     log::debug!("No DFU devices found");
-                    self.devices = None;
                     self.device_id = None;
                 }
+                self.devices = devices;
             }
             Err(error) => {
                 log::error!("{}", error);
