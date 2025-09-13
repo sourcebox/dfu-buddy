@@ -3,9 +3,9 @@
 //! References:
 //! - ST UM0290 for string descriptors memory segments coding
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
-use super::{requests, states, DfuDevice, Error, TIMEOUT};
+use super::{DfuDevice, Error, TIMEOUT, requests, states};
 
 /// Command code for "Set Address Pointer"
 const CMD_SET_ADDRESS_PTR: u8 = 0x21;
@@ -123,6 +123,7 @@ impl MemorySegment {
 pub fn set_address(device: &DfuDevice, address: u32) -> Result<()> {
     // Device must be in idle state for this operation
     device.abort_request()?;
+    device.wait_for_download_idle()?;
 
     // Issue the request
     set_address_request(device, address)?;
@@ -145,6 +146,7 @@ pub fn set_address(device: &DfuDevice, address: u32) -> Result<()> {
 pub fn erase_page(device: &DfuDevice, address: u32) -> Result<()> {
     // Device must be in idle state for this operation
     device.abort_request()?;
+    device.wait_for_download_idle()?;
 
     // Issue the request
     erase_page_request(device, address)?;
@@ -160,7 +162,7 @@ pub fn erase_page(device: &DfuDevice, address: u32) -> Result<()> {
     match res {
         Ok(_) => Ok(()),
         Err(err) if is_stm32h7(device) => stm32h7_erase_workaround(device, err),
-        Err(err) => Err(err)
+        Err(err) => Err(err),
     }
 }
 
@@ -218,7 +220,7 @@ fn stm32h7_erase_workaround(device: &DfuDevice, erase_err: anyhow::Error) -> Res
         if *state == states::DeviceStateCode::dfuDNBUSY {
             log::debug!("stm32h7 erase workaround");
             let _ = device.clrstatus_request();
-            return device.clrstatus_request()
+            return device.clrstatus_request();
         }
     }
     Err(erase_err)

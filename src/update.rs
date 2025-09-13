@@ -1,8 +1,8 @@
 //! Device update operations
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
-use crate::{dfudev, DeviceUpdateStep, Message};
+use crate::{DeviceUpdateStep, Message, dfudev};
 
 /// Perform a full update on the device (erase, program, verify).
 ///
@@ -231,6 +231,7 @@ fn program_device(
                                 write_address
                             );
 
+                            device.wait_for_download_idle()?;
                             device.download_request(block_no + 2, &file_data)?;
 
                             // First status response must have state dfuDNBUSY
@@ -354,6 +355,7 @@ fn verify_device(
                             let chunk_size =
                                 std::cmp::min(transfer_size, end_address - read_address);
 
+                            device.wait_for_upload_idle()?;
                             let mut device_data = vec![0; chunk_size as usize];
                             device.upload_request(block_no + 2, &mut device_data)?;
 
@@ -424,7 +426,6 @@ impl std::fmt::Display for Error {
                     format!("No target found for alt setting {alt_setting}."),
                 Self::MemoryRegionNotFound(start_address, end_address) => format!(
                     "No memory region found with address 0x{start_address:08X}..0x{end_address:08X}"
-                     
                 ),
                 Self::VerificationFailed(address) =>
                     format!("Verification failed at address 0x{address:08X}."),

@@ -11,9 +11,9 @@ pub mod states;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 pub use rusb::has_hotplug;
-use rusb::{constants, GlobalContext};
+use rusb::{GlobalContext, constants};
 
 pub use info::DeviceInfo;
 pub use states::{DeviceStateCode, DeviceStatusCode};
@@ -186,6 +186,22 @@ impl DfuDevice {
         Ok(())
     }
 
+    /// Wait until device is in dfuIDLE or dfuDNLOAD-IDLE state.
+    pub fn wait_for_download_idle(&self) -> Result<()> {
+        while let Ok(status) = self.getstatus_request() {
+            if (status.bState == DeviceStateCode::dfuIDLE
+                || status.bState == DeviceStateCode::dfuDNLOAD_IDLE)
+                && status.bStatus == DeviceStatusCode::OK
+            {
+                break;
+            } else {
+                self.clrstatus_request()?;
+            }
+        }
+
+        Ok(())
+    }
+
     /// Send a DFU_DNLOAD request
     ///
     /// A buffer containing data is written to the device and the number
@@ -201,6 +217,22 @@ impl DfuDevice {
         )?;
 
         Ok(transfer_size)
+    }
+
+    /// Wait until device is in dfuIDLE or dfuUPLOAD-IDLE state.
+    pub fn wait_for_upload_idle(&self) -> Result<()> {
+        while let Ok(status) = self.getstatus_request() {
+            if (status.bState == DeviceStateCode::dfuIDLE
+                || status.bState == DeviceStateCode::dfuUPLOAD_IDLE)
+                && status.bStatus == DeviceStatusCode::OK
+            {
+                break;
+            } else {
+                self.clrstatus_request()?;
+            }
+        }
+
+        Ok(())
     }
 
     /// Send a DFU_UPLOAD request

@@ -21,7 +21,7 @@ DFU Buddy is still work in progress and lacking functionality. Also, some device
 - Tests were done using the following devices:
   - STM32L433VC internal bootloader: working
   - STM32G474VC internal bootloader: working
-  - STM32F405RG (pyboard) internal bootloader: not working (overflow error).
+  - STM32F405RG internal bootloader: working
 
 ## Usage
 
