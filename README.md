@@ -18,10 +18,11 @@ DFU Buddy is still work in progress and lacking functionality. Also, some device
 - Plain DFU is not supported yet, only DfuSe devices like STM32.
 - Only the internal flash of STM32 MCUs can be programmed, no OTP, no option bytes.
 - Workarounds for specific non-compliant devices are not implemented.
-- Tests were done using the following devices:
-  - STM32L433VC internal bootloader: working
-  - STM32G474VC internal bootloader: working
-  - STM32F405RG internal bootloader: working
+- Tests were done using the internal ROM bootloader on the following devices:
+  - STM32L433VC
+  - STM32G474VC
+  - STM32F405RG
+  - STM32F303VC (STM32F3DISCOVERY)
 
 ## Usage
 
