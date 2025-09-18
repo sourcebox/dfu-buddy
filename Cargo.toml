@@ -33,7 +33,6 @@ default = ["libusb-vendored"]
 libusb-vendored = ["rusb/vendored"]
 
 [profile.release]
-lto = true
 strip = true
 
 [package.metadata.bundle]
