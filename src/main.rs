@@ -46,7 +46,6 @@ fn main() {
         "DFU Buddy",
         native_options,
         Box::new(|cc| {
-            cc.egui_ctx.set_theme(egui::Theme::Dark);
             cc.egui_ctx.all_styles_mut(|style| {
                 style.text_styles = [
                     (
@@ -431,8 +430,6 @@ impl App {
         } else {
             Self::default()
         };
-
-        cc.egui_ctx.set_visuals(egui::Visuals::dark());
 
         log::info!("USB hotplug: {}", dfudev::has_hotplug());
 
