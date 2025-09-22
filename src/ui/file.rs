@@ -2,7 +2,7 @@
 
 use eframe::egui;
 
-use crate::{dfudev, DfuFileChecks, Message};
+use crate::{DfuFileChecks, Message, dfudev};
 
 /// Show box with file selection
 pub fn selection(
@@ -75,7 +75,7 @@ pub fn common_info(
                             if dfu_file_checks.dfu_version_valid {
                                 egui::Color32::GREEN
                             } else {
-                                egui::Color32::RED
+                                ui.style().visuals.error_fg_color
                             }
                         } else {
                             egui::Color32::LIGHT_GRAY
@@ -94,7 +94,7 @@ pub fn common_info(
                             if dfu_file_checks.vendor_id_accepted {
                                 egui::Color32::GREEN
                             } else {
-                                egui::Color32::RED
+                                ui.style().visuals.error_fg_color
                             }
                         } else {
                             egui::Color32::LIGHT_GRAY
@@ -120,7 +120,7 @@ pub fn common_info(
                             if dfu_file_checks.product_id_accepted {
                                 egui::Color32::GREEN
                             } else {
-                                egui::Color32::RED
+                                ui.style().visuals.error_fg_color
                             }
                         } else {
                             egui::Color32::LIGHT_GRAY
@@ -149,7 +149,7 @@ pub fn common_info(
                         let text_color = if dfu_file_checks.crc_valid {
                             egui::Color32::GREEN
                         } else {
-                            egui::Color32::RED
+                            ui.style().visuals.error_fg_color
                         };
                         let crc_label = ui.add(egui::Label::new(
                             egui::RichText::new(format!("0x{:08X}", dfu_file.suffix.dwCRC))
@@ -237,7 +237,7 @@ pub fn content_info(
                                         } else {
                                             ui.add(egui::Label::new(
                                                 egui::RichText::new("Not found")
-                                                    .color(egui::Color32::RED),
+                                                    .color(ui.style().visuals.error_fg_color),
                                             ));
                                         }
                                     }

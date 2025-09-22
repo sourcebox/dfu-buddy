@@ -3,13 +3,16 @@
 #![warn(missing_docs)]
 
 mod dfudev;
-mod theme;
 mod ui;
 mod update;
 
 use std::time::Duration;
 
-use eframe::egui;
+use eframe::egui::{
+    self, FontFamily, FontId, Margin,
+    style::{Spacing, TextStyle},
+    vec2,
+};
 use simple_logger::SimpleLogger;
 use ui::modal::Modal;
 
@@ -44,7 +47,35 @@ fn main() {
         native_options,
         Box::new(|cc| {
             cc.egui_ctx.set_theme(egui::Theme::Dark);
-            cc.egui_ctx.set_style(theme::style());
+            cc.egui_ctx.all_styles_mut(|style| {
+                style.text_styles = [
+                    (
+                        TextStyle::Small,
+                        FontId::new(11.0, FontFamily::Proportional),
+                    ),
+                    (TextStyle::Body, FontId::new(14.0, FontFamily::Proportional)),
+                    (
+                        TextStyle::Button,
+                        FontId::new(14.0, FontFamily::Proportional),
+                    ),
+                    (
+                        TextStyle::Heading,
+                        FontId::new(18.0, FontFamily::Proportional),
+                    ),
+                    (
+                        TextStyle::Monospace,
+                        FontId::new(14.0, FontFamily::Monospace),
+                    ),
+                ]
+                .into();
+                style.spacing = Spacing {
+                    item_spacing: vec2(6.0, 6.0),
+                    window_margin: Margin::same(8),
+                    button_padding: vec2(16.0, 5.0),
+                    icon_width: 16.0,
+                    ..Default::default()
+                };
+            });
             Ok(Box::new(App::new(cc)))
         }),
     )
@@ -272,6 +303,7 @@ impl eframe::App for App {
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.add_space(5.0);
             egui::MenuBar::new().ui(ui, |ui| {
+                egui::widgets::global_theme_preference_switch(ui);
                 egui::containers::menu::MenuButton::new("File").ui(ui, |ui| {
                     if ui.button("Open...").clicked() {
                         self.message_channel.0.send(Message::OpenFileDialog).ok();
@@ -371,7 +403,7 @@ impl eframe::App for App {
                     egui::Align2::CENTER_CENTER,
                     "Drop DFU file top open.",
                     egui::FontId::new(16.0, egui::FontFamily::Proportional),
-                    egui::Color32::YELLOW,
+                    ctx.style().visuals.warn_fg_color,
                 );
             }
 

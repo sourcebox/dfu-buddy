@@ -1,6 +1,6 @@
 //! UI elements showing device-related information
 
-use crate::{dfudev, DeviceUpdateState, DeviceUpdateStep, Message};
+use crate::{DeviceUpdateState, DeviceUpdateStep, Message, dfudev};
 use eframe::egui;
 
 /// Show combobox with devices
@@ -178,11 +178,11 @@ pub fn update_controls(
             ui.vertical_centered(|ui| {
                 ui.add_space(10.0);
                 ui.add(egui::Label::new(
-                    egui::RichText::new("Error:").color(egui::Color32::RED),
+                    egui::RichText::new("Error:").color(ui.style().visuals.error_fg_color),
                 ));
                 ui.add(egui::Label::new(
                     egui::RichText::new(update_state.error.as_ref().unwrap())
-                        .color(egui::Color32::RED),
+                        .color(ui.style().visuals.error_fg_color),
                 ));
                 ui.add_space(10.0);
 
@@ -223,7 +223,7 @@ pub fn update_controls(
                     ui.add_space(5.0);
                     ui.add(egui::Label::new(
                         egui::RichText::new("Warning! All data on device will be erased!")
-                            .color(egui::Color32::YELLOW),
+                            .color(ui.style().visuals.warn_fg_color),
                     ));
                     ui.add_space(10.0);
 
@@ -252,7 +252,7 @@ pub fn update_controls(
                         egui::RichText::new(
                             "Some requirements are not met.\nPlease check your settings.",
                         )
-                        .color(egui::Color32::RED),
+                        .color(ui.style().visuals.error_fg_color),
                     ));
                 });
             }
@@ -260,7 +260,7 @@ pub fn update_controls(
             ui.centered_and_justified(|ui| {
                 ui.add(egui::Label::new(
                     egui::RichText::new("Please select a device and open a file.")
-                        .color(egui::Color32::YELLOW),
+                        .color(ui.style().visuals.warn_fg_color),
                 ));
             });
         }
