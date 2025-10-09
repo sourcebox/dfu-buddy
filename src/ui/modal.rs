@@ -6,9 +6,9 @@
 
 use eframe::egui;
 use egui::{
+    Area, Button, Context, Id, Layout, Response, RichText, Sense, Ui, WidgetText, Window,
     emath::{Align, Align2},
     epaint::{Color32, CornerRadius, Pos2},
-    Area, Button, Context, Id, Layout, Response, RichText, Sense, Ui, WidgetText, Window,
 };
 
 const ERROR_ICON_COLOR: Color32 = Color32::from_rgb(200, 90, 90);
@@ -483,13 +483,8 @@ impl Modal {
                 .interactable(true)
                 .fixed_pos(Pos2::ZERO)
                 .show(&self.ctx, |ui: &mut Ui| {
-                    let screen_rect = ui.ctx().input(|i| i.screen_rect);
-                    let area_response = ui.allocate_response(screen_rect.size(), Sense::click());
-                    // let current_focus = area_response.ctx.memory().focus().clone();
-                    // let top_layer = area_response.ctx.memory().layer_ids().last();
-                    // if let Some(focus) = current_focus {
-                    //     area_response.ctx.memory().surrender_focus(focus)
-                    // }
+                    let content_rect = ui.ctx().input(|i| i.content_rect());
+                    let area_response = ui.allocate_response(content_rect.size(), Sense::click());
                     if area_response.clicked() {
                         self.set_outside_clicked(true);
                         if self.close_on_outside_click {
@@ -497,7 +492,7 @@ impl Modal {
                         }
                     }
                     ui.painter().rect_filled(
-                        screen_rect,
+                        content_rect,
                         CornerRadius::ZERO,
                         self.style.overlay_color,
                     );
