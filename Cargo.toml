@@ -19,7 +19,7 @@ log = { version = "0.4.29", features = [
     "release_max_level_info",
 ] }
 regex = "1.12.3"
-rfd = { version = "0.15.4", default-features = false, features = ["gtk3"] }
+rfd = "0.17.2"
 rusb = { version = "0.9.4" }
 serde = { version = "1.0.228", features = ["derive"] }
 simple_logger = { version = "5.2.0" }
