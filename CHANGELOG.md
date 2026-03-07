@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Light theme and mode switcher.
 
+### Changed
+
+- Use XDG Desktop Portal instead of GTK for file dialog on Linux.
+
 ## [0.2.0] - 2025-09-13
 
 ### Fixed
