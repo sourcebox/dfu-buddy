@@ -271,27 +271,28 @@ impl Default for App {
 }
 
 impl eframe::App for App {
-    /// Called by the frame work to save state before shutdown
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
         eframe::set_value(storage, eframe::APP_KEY, self);
     }
 
-    /// Called each time the UI needs repainting, which may be many times per second.
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         let mut message_dialog = Modal::new(ctx, "message_dialog");
         message_dialog.show_dialog();
 
-        let zoom_factor = ctx.zoom_factor();
-        if self.zoom_factor != zoom_factor {
-            ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(WINDOW_SIZE * zoom_factor));
-            self.zoom_factor = zoom_factor;
+        while let Ok(message) = self.message_channel.1.try_recv() {
+            self.process_message(&message, ctx, &mut message_dialog);
         }
 
         // Continuous updates are required for message processing, but keep frame rate limited.
         ctx.request_repaint_after(Duration::from_millis(1000 / FPS_LIMIT as u64));
+    }
 
-        while let Ok(message) = self.message_channel.1.try_recv() {
-            self.process_message(&message, ctx, &mut message_dialog);
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        let zoom_factor = ui.ctx().zoom_factor();
+        if self.zoom_factor != zoom_factor {
+            ui.ctx()
+                .send_viewport_cmd(egui::ViewportCommand::InnerSize(WINDOW_SIZE * zoom_factor));
+            self.zoom_factor = zoom_factor;
         }
 
         self.device_update_state.device_ready = self.device_id.is_some();
@@ -299,7 +300,7 @@ impl eframe::App for App {
         self.device_update_state.preflight_checks_passed = self.preflight_checks();
 
         // Top panel with menu
-        egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
+        egui::Panel::top("top_panel").show_inside(ui, |ui| {
             ui.add_space(5.0);
             egui::MenuBar::new().ui(ui, |ui| {
                 egui::widgets::global_theme_preference_switch(ui);
@@ -309,7 +310,7 @@ impl eframe::App for App {
                         ui.close();
                     }
                     if ui.button("Quit").clicked() {
-                        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                        ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
                     }
                 });
             });
@@ -317,7 +318,7 @@ impl eframe::App for App {
         });
 
         // Bottom panel with app version
-        egui::TopBottomPanel::bottom("bottom_panel").show(ctx, |ui| {
+        egui::Panel::bottom("bottom_panel").show_inside(ui, |ui| {
             ui.add_space(5.0);
             ui.horizontal(|ui| {
                 ui.label(format!("v{}", &env!("CARGO_PKG_VERSION")));
@@ -329,7 +330,7 @@ impl eframe::App for App {
             ui.add_space(0.5);
         });
 
-        egui::CentralPanel::default().show(ctx, |ui| {
+        egui::CentralPanel::default().show_inside(ui, |ui| {
             ui.scope(|ui| {
                 if self.device_update_state.running {
                     ui.disable();
@@ -389,25 +390,25 @@ impl eframe::App for App {
 
         // File drag-and-drop
         if !self.device_update_state.running {
-            if !ctx.input(|i| i.raw.hovered_files.is_empty()) {
-                let painter = ctx.layer_painter(egui::LayerId::new(
+            if !ui.ctx().input(|i| i.raw.hovered_files.is_empty()) {
+                let painter = ui.ctx().layer_painter(egui::LayerId::new(
                     egui::Order::Foreground,
                     egui::Id::new("file_drop_target"),
                 ));
 
-                let content_rect = ctx.input(|i| i.content_rect());
+                let content_rect = ui.ctx().input(|i| i.content_rect());
                 painter.rect_filled(content_rect, 0.0, egui::Color32::from_black_alpha(192));
                 painter.text(
                     content_rect.center(),
                     egui::Align2::CENTER_CENTER,
                     "Drop DFU file top open.",
                     egui::FontId::new(16.0, egui::FontFamily::Proportional),
-                    ctx.style().visuals.warn_fg_color,
+                    ui.ctx().global_style().visuals.warn_fg_color,
                 );
             }
 
-            if !ctx.input(|i| i.raw.dropped_files.is_empty()) {
-                let dropped_files = ctx.input(|i| i.raw.dropped_files.clone());
+            if !ui.ctx().input(|i| i.raw.dropped_files.is_empty()) {
+                let dropped_files = ui.ctx().input(|i| i.raw.dropped_files.clone());
                 for file in &dropped_files {
                     if let Some(path) = &file.path {
                         self.message_channel

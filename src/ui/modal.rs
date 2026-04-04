@@ -151,8 +151,9 @@ impl ModalState {
     fn load(ctx: &Context, id: Id) -> Self {
         ctx.data_mut(|d| d.get_temp(id).unwrap_or_default())
     }
+
     fn save(self, ctx: &Context, id: Id) {
-        ctx.data_mut(|d| d.insert_temp(id, self))
+        ctx.data_mut(|d| d.insert_temp(id, self));
     }
 }
 
