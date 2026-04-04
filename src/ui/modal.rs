@@ -594,8 +594,10 @@ impl Modal {
                         if let Some(body) = modal_data.body {
                             self.body(ui, body)
                         }
-                    } else if modal_data.icon.is_some() && modal_data.icon.is_some() {
-                        self.body_and_icon(ui, modal_data.body.unwrap(), modal_data.icon.unwrap())
+                    } else if let Some(body) = modal_data.body
+                        && let Some(icon) = modal_data.icon
+                    {
+                        self.body_and_icon(ui, body, icon)
                     }
                 });
                 self.buttons(ui, |ui| {

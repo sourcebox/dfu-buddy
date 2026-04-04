@@ -584,8 +584,8 @@ impl App {
 
     /// Return reference to device with a certain id
     fn get_device(&self, id: u64) -> Option<&dfudev::DfuDevice> {
-        if self.devices.is_some() {
-            self.devices.as_ref().unwrap().iter().find(|&x| x.id == id)
+        if let Some(devices) = self.devices.as_ref() {
+            devices.iter().find(|&x| x.id == id)
         } else {
             None
         }
@@ -658,37 +658,37 @@ impl App {
     /// Match the selected file against the current device
     /// and set the file check flags accordingly
     fn match_file_against_device(&mut self) {
-        if let Some(dfu_file) = &self.dfu_file {
-            if let Some(device) = self.get_selected_device() {
-                let device_dfu_version = device.info.dfu_version;
-                let device_vendor_id = device.info.vendor_id;
-                let device_product_id = device.info.product_id;
-                let device_alt_settings = device.info.alt_settings.clone();
-                let file_dfu_version = dfu_file.suffix.bcdDFU;
-                let file_vendor_id = dfu_file.suffix.idVendor;
-                let file_product_id = dfu_file.suffix.idProduct;
+        if let Some(dfu_file) = &self.dfu_file
+            && let Some(device) = self.get_selected_device()
+        {
+            let device_dfu_version = device.info.dfu_version;
+            let device_vendor_id = device.info.vendor_id;
+            let device_product_id = device.info.product_id;
+            let device_alt_settings = device.info.alt_settings.clone();
+            let file_dfu_version = dfu_file.suffix.bcdDFU;
+            let file_vendor_id = dfu_file.suffix.idVendor;
+            let file_product_id = dfu_file.suffix.idProduct;
 
-                self.dfu_file_checks.dfu_version_valid = file_dfu_version == device_dfu_version;
+            self.dfu_file_checks.dfu_version_valid = file_dfu_version == device_dfu_version;
 
-                self.dfu_file_checks.vendor_id_accepted =
-                    (file_vendor_id == 0xFFFF) || (file_vendor_id == device_vendor_id);
-                self.dfu_file_checks.product_id_accepted =
-                    (file_product_id == 0xFFFF) || (file_product_id == device_product_id);
+            self.dfu_file_checks.vendor_id_accepted =
+                (file_vendor_id == 0xFFFF) || (file_vendor_id == device_vendor_id);
+            self.dfu_file_checks.product_id_accepted =
+                (file_product_id == 0xFFFF) || (file_product_id == device_product_id);
 
-                match &dfu_file.content {
-                    dfufile::Content::Plain => {
-                        self.dfu_file_checks.targets_valid = true;
-                    }
-                    dfufile::Content::DfuSe(content) => {
-                        self.dfu_file_checks.targets_valid = true;
-                        for image in &content.images {
-                            let target = device_alt_settings
-                                .iter()
-                                .find(|&alt| alt.0 == image.target_prefix.bAlternateSetting);
-                            if target.is_none() {
-                                self.dfu_file_checks.targets_valid = false;
-                                break;
-                            }
+            match &dfu_file.content {
+                dfufile::Content::Plain => {
+                    self.dfu_file_checks.targets_valid = true;
+                }
+                dfufile::Content::DfuSe(content) => {
+                    self.dfu_file_checks.targets_valid = true;
+                    for image in &content.images {
+                        let target = device_alt_settings
+                            .iter()
+                            .find(|&alt| alt.0 == image.target_prefix.bAlternateSetting);
+                        if target.is_none() {
+                            self.dfu_file_checks.targets_valid = false;
+                            break;
                         }
                     }
                 }

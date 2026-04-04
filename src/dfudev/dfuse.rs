@@ -216,12 +216,12 @@ fn stm32h7_erase_workaround(device: &DfuDevice, erase_err: anyhow::Error) -> Res
     // Workaround for STM32H7 (Rev.V ?) sector erase beyond 1MB.
     // See: https://community.st.com/t5/stm32cubeprogrammer-mcu/weird-stm32h743zi-rev-v-usb-dfu-erase-behavior-beyond-1mb-sector/m-p/234209
 
-    if let Some(Error::InvalidDeviceState(state)) = erase_err.downcast_ref::<Error>() {
-        if *state == states::DeviceStateCode::dfuDNBUSY {
-            log::debug!("stm32h7 erase workaround");
-            let _ = device.clrstatus_request();
-            return device.clrstatus_request();
-        }
+    if let Some(Error::InvalidDeviceState(state)) = erase_err.downcast_ref::<Error>()
+        && *state == states::DeviceStateCode::dfuDNBUSY
+    {
+        log::debug!("stm32h7 erase workaround");
+        let _ = device.clrstatus_request();
+        return device.clrstatus_request();
     }
     Err(erase_err)
 }
