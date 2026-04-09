@@ -14,7 +14,7 @@ use eframe::egui::{
     vec2,
 };
 use simple_logger::SimpleLogger;
-use ui::modal::Modal;
+use ui::dialog::{ErrorDialog, ShowDialog};
 
 use ui::{device, file};
 
@@ -119,6 +119,10 @@ pub struct App {
 
     /// Zoom factor.
     zoom_factor: f32,
+
+    /// Modal dialog.
+    #[serde(skip)]
+    modal_dialog: Option<Box<dyn ShowDialog>>,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -148,8 +152,8 @@ pub enum Message {
     OpenMessageDialog {
         /// Title.
         title: String,
-        /// Body content.
-        body: String,
+        /// Message text.
+        message: String,
     },
 
     /// Start the update process in a separate thread
@@ -266,6 +270,7 @@ impl Default for App {
             message_channel: std::sync::mpsc::channel(),
             device_update_state: DeviceUpdateState::default(),
             zoom_factor: 1.0,
+            modal_dialog: None,
         }
     }
 }
@@ -276,11 +281,8 @@ impl eframe::App for App {
     }
 
     fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        let mut message_dialog = Modal::new(ctx, "message_dialog");
-        message_dialog.show_dialog();
-
         while let Ok(message) = self.message_channel.1.try_recv() {
-            self.process_message(&message, ctx, &mut message_dialog);
+            self.process_message(&message, ctx);
         }
 
         // Continuous updates are required for message processing, but keep frame rate limited.
@@ -298,6 +300,16 @@ impl eframe::App for App {
         self.device_update_state.device_ready = self.device_id.is_some();
         self.device_update_state.file_ready = self.dfu_file.is_some();
         self.device_update_state.preflight_checks_passed = self.preflight_checks();
+
+        if let Some(modal_dialog) = &mut self.modal_dialog {
+            let (should_close, event) = modal_dialog.show(ui.ctx());
+            if should_close {
+                self.modal_dialog = None;
+            }
+            if let Some(event) = event {
+                self.message_channel.0.send(event).ok();
+            }
+        }
 
         // Top panel with menu
         egui::Panel::top("top_panel").show_inside(ui, |ui| {
@@ -455,12 +467,7 @@ impl App {
     }
 
     /// Process a message
-    fn process_message(
-        &mut self,
-        message: &Message,
-        ctx: &egui::Context,
-        message_dialog: &mut Modal,
-    ) {
+    fn process_message(&mut self, message: &Message, ctx: &egui::Context) {
         match message {
             Message::Init => {
                 ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(WINDOW_SIZE));
@@ -493,12 +500,9 @@ impl App {
                 }
                 self.device_update_state = DeviceUpdateState::default();
             }
-            Message::OpenMessageDialog { title, body } => {
-                message_dialog
-                    .dialog()
-                    .with_title(title)
-                    .with_body(body)
-                    .open();
+            Message::OpenMessageDialog { title, message } => {
+                let error_dialog = ErrorDialog::new(title.to_owned(), message.to_owned(), None);
+                self.modal_dialog = Some(Box::new(error_dialog));
             }
             Message::DeviceUpdateStarted => {
                 log::debug!("Device update started.");
@@ -647,7 +651,7 @@ impl App {
                     .0
                     .send(Message::OpenMessageDialog {
                         title: "Error opening DFU file".into(),
-                        body: format!("{error}"),
+                        message: format!("{error}"),
                     })
                     .ok();
                 self.dfu_file = None;
