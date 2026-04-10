@@ -273,7 +273,7 @@ fn program_device(
     Ok(())
 }
 
-/// Verifys the data in the device.
+/// Verifies the data in the device.
 fn verify_device(
     device_id: u64,
     file_path: &std::path::Path,
