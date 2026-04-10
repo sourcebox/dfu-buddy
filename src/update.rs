@@ -2,22 +2,22 @@
 
 use anyhow::{Result, anyhow};
 
-use crate::{DeviceUpdateStep, Message, dfudev};
+use crate::{AppEvent, DeviceUpdateStep, dfudev};
 
 /// Perform a full update on the device (erase, program, verify).
 ///
 /// This function is executed in a separate thread and communicates with
-/// the main thread via messages
+/// the main thread via events.
 pub fn full_update(
     device_id: u64,
     file_path: std::path::PathBuf,
-    message_sender: std::sync::mpsc::Sender<Message>,
+    event_sender: std::sync::mpsc::Sender<AppEvent>,
 ) -> Result<()> {
-    message_sender.send(Message::DeviceUpdateStarted)?;
-    erase_device(device_id, &file_path, &message_sender)?;
-    program_device(device_id, &file_path, &message_sender)?;
-    verify_device(device_id, &file_path, &message_sender)?;
-    message_sender.send(Message::DeviceUpdateFinished)?;
+    event_sender.send(AppEvent::DeviceUpdateStarted)?;
+    erase_device(device_id, &file_path, &event_sender)?;
+    program_device(device_id, &file_path, &event_sender)?;
+    verify_device(device_id, &file_path, &event_sender)?;
+    event_sender.send(AppEvent::DeviceUpdateFinished)?;
 
     Ok(())
 }
@@ -26,11 +26,11 @@ pub fn full_update(
 fn erase_device(
     device_id: u64,
     file_path: &std::path::Path,
-    message_sender: &std::sync::mpsc::Sender<Message>,
+    event_sender: &std::sync::mpsc::Sender<AppEvent>,
 ) -> Result<()> {
     // Set the step so UI knows it
-    message_sender
-        .send(Message::DeviceUpdateStep(DeviceUpdateStep::Erase))
+    event_sender
+        .send(AppEvent::DeviceUpdateStep(DeviceUpdateStep::Erase))
         .ok();
 
     // Find the device by its id and open it
@@ -107,8 +107,8 @@ fn erase_device(
                                     / (num_images as f32)
                                     * ((element_no + 1) as f32)
                                     / (num_elements as f32);
-                                message_sender
-                                    .send(Message::DeviceEraseProgress(progress))
+                                event_sender
+                                    .send(AppEvent::DeviceEraseProgress(progress))
                                     .ok();
 
                                 erase_address += sector_size;
@@ -139,11 +139,11 @@ fn erase_device(
 fn program_device(
     device_id: u64,
     file_path: &std::path::Path,
-    message_sender: &std::sync::mpsc::Sender<Message>,
+    event_sender: &std::sync::mpsc::Sender<AppEvent>,
 ) -> Result<()> {
     // Set the step so UI knows it
-    message_sender
-        .send(Message::DeviceUpdateStep(DeviceUpdateStep::Program))
+    event_sender
+        .send(AppEvent::DeviceUpdateStep(DeviceUpdateStep::Program))
         .ok();
 
     // Find the device by its id and open it
@@ -251,8 +251,8 @@ fn program_device(
                                 / (num_images as f32)
                                 * ((element_no + 1) as f32)
                                 / (num_elements as f32);
-                            message_sender
-                                .send(Message::DeviceProgramProgress(progress))
+                            event_sender
+                                .send(AppEvent::DeviceProgramProgress(progress))
                                 .ok();
 
                             write_address += chunk_size;
@@ -277,11 +277,11 @@ fn program_device(
 fn verify_device(
     device_id: u64,
     file_path: &std::path::Path,
-    message_sender: &std::sync::mpsc::Sender<Message>,
+    event_sender: &std::sync::mpsc::Sender<AppEvent>,
 ) -> Result<()> {
     // Set the step so UI knows it
-    message_sender
-        .send(Message::DeviceUpdateStep(DeviceUpdateStep::Verify))
+    event_sender
+        .send(AppEvent::DeviceUpdateStep(DeviceUpdateStep::Verify))
         .ok();
 
     // Find the device by its id and open it
@@ -375,8 +375,8 @@ fn verify_device(
                                 / (num_images as f32)
                                 * ((element_no + 1) as f32)
                                 / (num_elements as f32);
-                            message_sender
-                                .send(Message::DeviceVerifyProgress(progress))
+                            event_sender
+                                .send(AppEvent::DeviceVerifyProgress(progress))
                                 .ok();
 
                             read_address += chunk_size;

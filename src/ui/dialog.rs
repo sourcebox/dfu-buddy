@@ -3,14 +3,14 @@
 use eframe::egui;
 use egui::{Context, Id, Modal};
 
-use crate::Message;
+use crate::AppEvent;
 
 /// Show function to be implemented by dialogs.
 pub trait ShowDialog {
     /// Shows the dialog.
     ///
     /// Returns if it should be closed and an optional event.
-    fn show(&mut self, ctx: &Context) -> (bool, Option<Message>);
+    fn show(&mut self, ctx: &Context) -> (bool, Option<AppEvent>);
 }
 
 /// Dialog to show an error.
@@ -22,12 +22,12 @@ pub struct ErrorDialog {
     message: String,
 
     /// Event to be returned when OK is pressed.
-    ok_event: Option<Message>,
+    ok_event: Option<AppEvent>,
 }
 
 impl ErrorDialog {
     /// Returns a new dialog.
-    pub fn new(title: String, message: String, ok_event: Option<Message>) -> Self {
+    pub fn new(title: String, message: String, ok_event: Option<AppEvent>) -> Self {
         Self {
             title,
             message,
@@ -37,7 +37,7 @@ impl ErrorDialog {
 }
 
 impl ShowDialog for ErrorDialog {
-    fn show(&mut self, ctx: &Context) -> (bool, Option<Message>) {
+    fn show(&mut self, ctx: &Context) -> (bool, Option<AppEvent>) {
         let mut event = None;
 
         let modal = Modal::new(Id::new("Error Dialog")).show(ctx, |ui| {

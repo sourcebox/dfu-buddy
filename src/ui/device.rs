@@ -1,6 +1,6 @@
 //! UI elements showing device-related information
 
-use crate::{DeviceUpdateState, DeviceUpdateStep, Message, dfudev};
+use crate::{AppEvent, DeviceUpdateState, DeviceUpdateStep, dfudev};
 use eframe::egui;
 
 /// Show combobox with devices
@@ -8,7 +8,7 @@ pub fn selection(
     ui: &mut egui::Ui,
     devices: &Option<Vec<dfudev::DfuDevice>>,
     selected_device: &Option<&dfudev::DfuDevice>,
-    message_sender: &std::sync::mpsc::Sender<Message>,
+    event_sender: &std::sync::mpsc::Sender<AppEvent>,
 ) {
     let mut device_list = Vec::new();
     let mut device_index = 0;
@@ -61,7 +61,7 @@ pub fn selection(
                         None
                     };
                     if d.is_some() && index == device_index {
-                        message_sender.send(Message::DeviceSelected(device.id)).ok();
+                        event_sender.send(AppEvent::DeviceSelected(device.id)).ok();
                     }
                 }
             };
@@ -69,7 +69,7 @@ pub fn selection(
 
         ui.centered_and_justified(|ui| {
             if ui.button("Rescan").clicked() {
-                message_sender.send(Message::RescanDevices).ok();
+                event_sender.send(AppEvent::RescanDevices).ok();
             };
         });
     });
@@ -168,7 +168,7 @@ pub fn memory_info(ui: &mut egui::Ui, device_info: Option<&dfudev::DeviceInfo>) 
 pub fn update_controls(
     ui: &mut egui::Ui,
     update_state: &mut DeviceUpdateState,
-    message_sender: &std::sync::mpsc::Sender<Message>,
+    event_sender: &std::sync::mpsc::Sender<AppEvent>,
 ) {
     ui.vertical(|ui| {
         ui.set_width(ui.available_width() / 3.0);
@@ -241,7 +241,7 @@ pub fn update_controls(
                         );
 
                         if update_button.clicked() {
-                            message_sender.send(Message::StartUpdate).ok();
+                            event_sender.send(AppEvent::StartUpdate).ok();
                             update_state.confirmed = false;
                         };
                     });

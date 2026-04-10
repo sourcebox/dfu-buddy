@@ -2,13 +2,13 @@
 
 use eframe::egui;
 
-use crate::{DfuFileChecks, Message, dfudev};
+use crate::{AppEvent, DfuFileChecks, dfudev};
 
 /// Show box with file selection
 pub fn selection(
     ui: &mut egui::Ui,
     selected_file: &Option<dfufile::DfuFile>,
-    message_sender: &std::sync::mpsc::Sender<Message>,
+    event_sender: &std::sync::mpsc::Sender<AppEvent>,
 ) {
     let file_path = selected_file.as_ref().map(|file| &file.path);
 
@@ -38,11 +38,11 @@ pub fn selection(
             .add(egui::widgets::Button::new("Open...").fill(ui.style().visuals.selection.bg_fill));
 
         if open_button.clicked() {
-            message_sender.send(Message::OpenFileDialog).ok();
+            event_sender.send(AppEvent::OpenFileDialog).ok();
         }
 
         if ui.button("Clear").clicked() {
-            message_sender.send(Message::ClearFile).ok();
+            event_sender.send(AppEvent::ClearFile).ok();
         }
     });
 }

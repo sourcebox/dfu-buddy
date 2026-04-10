@@ -106,11 +106,11 @@ pub struct App {
     /// Last path shown in the open file dialog
     file_dialog_path: Option<std::path::PathBuf>,
 
-    /// Message channel
+    /// Event channel
     #[serde(skip)]
-    message_channel: (
-        std::sync::mpsc::Sender<Message>,
-        std::sync::mpsc::Receiver<Message>,
+    event_channel: (
+        std::sync::mpsc::Sender<AppEvent>,
+        std::sync::mpsc::Receiver<AppEvent>,
     ),
 
     /// Device update state
@@ -127,57 +127,58 @@ pub struct App {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-/// Messages for application actions
+/// Application events.
 #[derive(Debug, Clone)]
-pub enum Message {
+pub enum AppEvent {
     /// Initialization on startup
     Init,
 
-    /// Force rescanning of devices
+    /// Forces the rescanning of devices.
     RescanDevices,
 
-    /// Select a device with a specific id
+    /// Selects a device with a specific id.
     DeviceSelected(u64),
 
-    /// Open the file dialog
+    /// Opens the file dialog.
     OpenFileDialog,
 
-    /// Clear the selected file
+    /// Clears the selected file.
     ClearFile,
 
-    /// Open a file
+    /// Opens a file.
     OpenFile(std::path::PathBuf),
 
-    /// Open a message dialog.
-    OpenMessageDialog {
+    /// Opens an error dialog.
+    OpenErrorDialog {
         /// Title.
         title: String,
+
         /// Message text.
         message: String,
     },
 
-    /// Start the update process in a separate thread
+    /// Start the update process in a separate thread.
     StartUpdate,
 
-    /// Send from update task when operation starts
+    /// Notification from update task when operation starts.
     DeviceUpdateStarted,
 
-    /// Send from update task when everything is finished
+    /// Notification from update task when everything is finished.
     DeviceUpdateFinished,
 
-    /// Send from update task when an error has occurred
+    /// Notification from update task when an error has occurred.
     DeviceUpdateError(String),
 
-    /// Set a new update step
+    /// Sets a new update step.
     DeviceUpdateStep(DeviceUpdateStep),
 
-    /// Set progress for device erase operation
+    /// Sets the progress for device erase operation.
     DeviceEraseProgress(f32),
 
-    /// Set progress for device program operation
+    /// Sets the progress for device program operation.
     DeviceProgramProgress(f32),
 
-    /// Set progress for device verify operation
+    /// Sets the progress for device verify operation.
     DeviceVerifyProgress(f32),
 }
 
@@ -267,7 +268,7 @@ impl Default for App {
             dfu_file: None,
             file_dialog_path: None,
             dfu_file_checks: DfuFileChecks::default(),
-            message_channel: std::sync::mpsc::channel(),
+            event_channel: std::sync::mpsc::channel(),
             device_update_state: DeviceUpdateState::default(),
             zoom_factor: 1.0,
             modal_dialog: None,
@@ -281,11 +282,11 @@ impl eframe::App for App {
     }
 
     fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        while let Ok(message) = self.message_channel.1.try_recv() {
-            self.process_message(&message, ctx);
+        while let Ok(event) = self.event_channel.1.try_recv() {
+            self.process_event(event, ctx);
         }
 
-        // Continuous updates are required for message processing, but keep frame rate limited.
+        // Continuous updates are required for event processing, but keep frame rate limited.
         ctx.request_repaint_after(Duration::from_millis(1000 / FPS_LIMIT as u64));
     }
 
@@ -307,7 +308,7 @@ impl eframe::App for App {
                 self.modal_dialog = None;
             }
             if let Some(event) = event {
-                self.message_channel.0.send(event).ok();
+                self.event_channel.0.send(event).ok();
             }
         }
 
@@ -318,7 +319,7 @@ impl eframe::App for App {
                 egui::widgets::global_theme_preference_switch(ui);
                 egui::containers::menu::MenuButton::new("File").ui(ui, |ui| {
                     if ui.button("Open...").clicked() {
-                        self.message_channel.0.send(Message::OpenFileDialog).ok();
+                        self.event_channel.0.send(AppEvent::OpenFileDialog).ok();
                         ui.close();
                     }
                     if ui.button("Quit").clicked() {
@@ -354,7 +355,7 @@ impl eframe::App for App {
                     ui,
                     &self.devices,
                     &self.get_selected_device(),
-                    &self.message_channel.0,
+                    &self.event_channel.0,
                 );
 
                 ui.add_space(5.0);
@@ -370,7 +371,7 @@ impl eframe::App for App {
 
                 ui.add_space(5.0);
 
-                ui::file::selection(ui, &self.dfu_file, &self.message_channel.0);
+                ui::file::selection(ui, &self.dfu_file, &self.event_channel.0);
 
                 ui.add_space(5.0);
 
@@ -394,7 +395,7 @@ impl eframe::App for App {
 
             ui.horizontal(|ui| {
                 ui.set_height(100.0);
-                device::update_controls(ui, &mut self.device_update_state, &self.message_channel.0);
+                device::update_controls(ui, &mut self.device_update_state, &self.event_channel.0);
                 ui.add_space(10.0);
                 device::update_progress(ui, &self.device_update_state);
             });
@@ -423,9 +424,9 @@ impl eframe::App for App {
                 let dropped_files = ui.ctx().input(|i| i.raw.dropped_files.clone());
                 for file in &dropped_files {
                     if let Some(path) = &file.path {
-                        self.message_channel
+                        self.event_channel
                             .0
-                            .send(Message::OpenFile(path.clone()))
+                            .send(AppEvent::OpenFile(path.clone()))
                             .ok();
                         break;
                     }
@@ -446,7 +447,7 @@ impl App {
 
         log::info!("USB hotplug: {}", dfudev::has_hotplug());
 
-        app.message_channel.0.send(Message::Init).ok();
+        app.event_channel.0.send(AppEvent::Init).ok();
 
         let mut args = std::env::args();
 
@@ -454,10 +455,7 @@ impl App {
             // First CLI argument is used as file path
             let file_path = std::path::PathBuf::from(args.nth(1).unwrap().trim());
             if file_path.exists() && file_path.is_file() {
-                app.message_channel
-                    .0
-                    .send(Message::OpenFile(file_path))
-                    .ok();
+                app.event_channel.0.send(AppEvent::OpenFile(file_path)).ok();
             } else {
                 log::error!("File {:?} does not exist.", file_path);
             }
@@ -466,85 +464,85 @@ impl App {
         app
     }
 
-    /// Process a message
-    fn process_message(&mut self, message: &Message, ctx: &egui::Context) {
-        match message {
-            Message::Init => {
+    /// Processes an event.
+    fn process_event(&mut self, event: AppEvent, ctx: &egui::Context) {
+        match event {
+            AppEvent::Init => {
                 ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(WINDOW_SIZE));
                 self.scan_devices();
             }
-            Message::RescanDevices => {
+            AppEvent::RescanDevices => {
                 self.scan_devices();
             }
-            Message::DeviceSelected(device_id) => {
-                self.device_id = Some(*device_id);
+            AppEvent::DeviceSelected(device_id) => {
+                self.device_id = Some(device_id);
                 self.match_file_against_device();
                 let device = self.get_selected_device().unwrap();
                 log::debug!("Selected device {}", device.info);
                 self.device_update_state = DeviceUpdateState::default();
             }
-            Message::OpenFileDialog => {
+            AppEvent::OpenFileDialog => {
                 self.open_file_dialog();
             }
-            Message::ClearFile => {
+            AppEvent::ClearFile => {
                 self.dfu_file = None;
                 self.dfu_file_checks = DfuFileChecks::default();
                 self.device_update_state = DeviceUpdateState::default();
             }
-            Message::OpenFile(file_path) => {
+            AppEvent::OpenFile(file_path) => {
                 log::debug!("Opening file {:?}", file_path);
-                self.open_file(file_path);
+                self.open_file(&file_path);
                 self.match_file_against_device();
                 if let Some(parent_path) = file_path.parent() {
                     self.file_dialog_path = Some(std::path::PathBuf::from(parent_path));
                 }
                 self.device_update_state = DeviceUpdateState::default();
             }
-            Message::OpenMessageDialog { title, message } => {
-                let error_dialog = ErrorDialog::new(title.to_owned(), message.to_owned(), None);
+            AppEvent::OpenErrorDialog { title, message } => {
+                let error_dialog = ErrorDialog::new(title, message, None);
                 self.modal_dialog = Some(Box::new(error_dialog));
             }
-            Message::DeviceUpdateStarted => {
+            AppEvent::DeviceUpdateStarted => {
                 log::debug!("Device update started.");
                 self.device_update_state = DeviceUpdateState::default();
                 self.device_update_state.running = true;
                 self.device_update_state.finished = false;
             }
-            Message::DeviceUpdateFinished => {
+            AppEvent::DeviceUpdateFinished => {
                 log::debug!("Device update finished.");
                 self.device_update_state.running = false;
                 self.device_update_state.step = None;
                 self.device_update_state.finished = true;
             }
-            Message::DeviceUpdateError(error) => {
+            AppEvent::DeviceUpdateError(error) => {
                 log::error!("Device update error: {}", error);
                 self.device_update_state.running = false;
                 self.device_update_state.error = Some(error.to_string());
             }
-            Message::DeviceUpdateStep(step) => {
+            AppEvent::DeviceUpdateStep(step) => {
                 log::debug!("Device update step {:?}", step);
-                self.device_update_state.step = Some(*step)
+                self.device_update_state.step = Some(step)
             }
-            Message::DeviceEraseProgress(value) => self.device_update_state.erase_progress = *value,
-            Message::DeviceProgramProgress(value) => {
-                self.device_update_state.program_progress = *value
+            AppEvent::DeviceEraseProgress(value) => self.device_update_state.erase_progress = value,
+            AppEvent::DeviceProgramProgress(value) => {
+                self.device_update_state.program_progress = value
             }
-            Message::DeviceVerifyProgress(value) => {
-                self.device_update_state.verify_progress = *value
+            AppEvent::DeviceVerifyProgress(value) => {
+                self.device_update_state.verify_progress = value
             }
-            Message::StartUpdate => {
+            AppEvent::StartUpdate => {
                 if !self.device_update_state.running {
                     let device_id = self.device_id.unwrap();
                     let file_path = self.dfu_file.as_ref().unwrap().path.clone();
-                    let message_sender = self.message_channel.0.clone();
-                    let message_sender_result = self.message_channel.0.clone();
+                    let event_sender = self.event_channel.0.clone();
+                    let event_sender_result = self.event_channel.0.clone();
                     std::thread::spawn(move || {
-                        let result = update::full_update(device_id, file_path, message_sender);
+                        let result = update::full_update(device_id, file_path, event_sender);
                         match result {
                             Ok(_) => {}
                             Err(error) => {
-                                message_sender_result
-                                    .send(Message::DeviceUpdateError(format!("{error}")))
+                                event_sender_result
+                                    .send(AppEvent::DeviceUpdateError(format!("{error}")))
                                     .ok();
                             }
                         }
@@ -619,9 +617,9 @@ impl App {
             .pick_file();
 
         if let Some(file_path) = result {
-            self.message_channel
+            self.event_channel
                 .0
-                .send(Message::OpenFile(file_path))
+                .send(AppEvent::OpenFile(file_path))
                 .ok();
         }
     }
@@ -647,9 +645,9 @@ impl App {
             }
             Err(error) => {
                 log::error!("{}", error);
-                self.message_channel
+                self.event_channel
                     .0
-                    .send(Message::OpenMessageDialog {
+                    .send(AppEvent::OpenErrorDialog {
                         title: "Error opening DFU file".into(),
                         message: format!("{error}"),
                     })
