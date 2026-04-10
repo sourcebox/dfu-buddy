@@ -760,11 +760,11 @@ dependencies = [
 
 [[package]]
 name = "dfufile"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "539c5f1558b2171d9273647e82b14493f479f13df67e228eb6a5cdf385af3099"
+checksum = "ff6caa70e60ed869d08208a456766954aaf3d69b9ce5379a0341278bb070c84b"
 dependencies = [
- "anyhow",
+ "thiserror 2.0.18",
 ]
 
 [[package]]

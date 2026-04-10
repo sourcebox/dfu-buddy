@@ -681,7 +681,7 @@ impl App {
                 dfufile::Content::Plain => {
                     self.dfu_file_checks.targets_valid = true;
                 }
-                dfufile::Content::DfuSe(content) => {
+                dfufile::Content::Dfuse(content) => {
                     self.dfu_file_checks.targets_valid = true;
                     for image in &content.images {
                         let target = device_alt_settings

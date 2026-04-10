@@ -198,7 +198,7 @@ pub fn content_info(
                         ui.label("Plain file. No details available.");
                     });
                 }
-                dfufile::Content::DfuSe(content) => {
+                dfufile::Content::Dfuse(content) => {
                     ui.vertical(|ui| {
                         ui.heading("Images");
                         ui.add_space(5.0);

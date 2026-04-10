@@ -55,7 +55,7 @@ fn erase_device(
         dfufile::Content::Plain => {
             log::warn!("Plain DFU does not support separate erase. Skipped.");
         }
-        dfufile::Content::DfuSe(content) => {
+        dfufile::Content::Dfuse(content) => {
             let num_images = content.images.len();
 
             for (image_no, image) in content.images.iter().enumerate() {
@@ -168,7 +168,7 @@ fn program_device(
         dfufile::Content::Plain => {
             return Err(anyhow!(Error::PlainDfuNotSupported));
         }
-        dfufile::Content::DfuSe(content) => {
+        dfufile::Content::Dfuse(content) => {
             let num_images = content.images.len();
 
             for (image_no, image) in content.images.iter().enumerate() {
@@ -306,7 +306,7 @@ fn verify_device(
         dfufile::Content::Plain => {
             return Err(anyhow!(Error::PlainDfuNotSupported));
         }
-        dfufile::Content::DfuSe(content) => {
+        dfufile::Content::Dfuse(content) => {
             let num_images = content.images.len();
 
             for (image_no, image) in content.images.iter().enumerate() {
