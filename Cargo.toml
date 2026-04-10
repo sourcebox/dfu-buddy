@@ -32,6 +32,10 @@ features = ["persistence"]
 default = ["libusb-vendored"]
 libusb-vendored = ["rusb/vendored"]
 
+[lints.rust]
+missing_docs = "warn"
+unsafe_code = "deny"
+
 [profile.release]
 strip = true
 

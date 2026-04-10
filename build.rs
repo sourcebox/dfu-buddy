@@ -1,3 +1,5 @@
+//! Build time tasks.
+
 fn main() {
     #[cfg(target_os = "macos")]
     build_macos();

@@ -1,6 +1,5 @@
 #![doc = include_str!("../README.md")]
 #![windows_subsystem = "windows"]
-#![warn(missing_docs)]
 
 mod dfudev;
 mod ui;
