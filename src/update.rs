@@ -334,7 +334,7 @@ fn verify_device(
 
     match &file.content {
         dfufile::Content::Plain => {
-            return Err(anyhow!(Error::PlainDfuNotSupported));
+            // TODO.
         }
         dfufile::Content::Dfuse(content) => {
             let num_images = content.images.len();
@@ -439,9 +439,6 @@ pub enum Error {
 
     /// Verification error
     VerificationFailed(u32),
-
-    /// Plain DFU is not supported yet
-    PlainDfuNotSupported,
 }
 
 impl std::error::Error for Error {}
@@ -459,7 +456,6 @@ impl std::fmt::Display for Error {
                 ),
                 Self::VerificationFailed(address) =>
                     format!("Verification failed at address 0x{address:08X}."),
-                Self::PlainDfuNotSupported => "Plain DFU devices are not supported yet".to_string(),
             }
         )
     }
