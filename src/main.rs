@@ -13,8 +13,8 @@ use eframe::egui::{
     vec2,
 };
 use simple_logger::SimpleLogger;
-use ui::dialog::{ErrorDialog, ShowDialog};
 
+use ui::dialog::{ErrorDialog, ShowDialog};
 use ui::{device, file};
 
 /// Size of the native application window
@@ -670,7 +670,13 @@ impl App {
             let file_vendor_id = dfu_file.suffix.idVendor;
             let file_product_id = dfu_file.suffix.idProduct;
 
-            self.dfu_file_checks.dfu_version_valid = file_dfu_version == device_dfu_version;
+            let is_dfuse_device = device_dfu_version == 0x011A;
+            if is_dfuse_device {
+                self.dfu_file_checks.dfu_version_valid = file_dfu_version == 0x011A;
+            } else {
+                self.dfu_file_checks.dfu_version_valid =
+                    matches!(file_dfu_version, 0x0100 | 0x0110);
+            }
 
             self.dfu_file_checks.vendor_id_accepted =
                 (file_vendor_id == 0xFFFF) || (file_vendor_id == device_vendor_id);
