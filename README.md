@@ -12,10 +12,9 @@ Operation is designed to be simple and straightforward for non-expert users. The
 
 ## Status
 
-DFU Buddy is still work in progress and lacking functionality. Also, some devices don't work yet. Support by other users, mainly in form of testing with USB devices is highly appreciated.
+DFU Buddy is still work in progress. Support by other users, mainly in form of testing with a variety of USB devices is highly appreciated.
 
 - Devices must be in DFU mode to appear in the selection menu.
-- Plain DFU is not supported yet, only DfuSe devices like STM32.
 - Only the internal flash of STM32 MCUs can be programmed, no OTP, no option bytes.
 - Workarounds for specific non-compliant devices are not implemented.
 - Tests were done using the internal ROM bootloader on the following devices:
