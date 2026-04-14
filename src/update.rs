@@ -54,6 +54,7 @@ fn erase_device(
     match &file.content {
         dfufile::Content::Plain => {
             log::warn!("Plain DFU does not support separate erase. Skipped.");
+            event_sender.send(AppEvent::DeviceEraseProgress(1.0)).ok();
         }
         dfufile::Content::Dfuse(content) => {
             let num_images = content.images.len();
