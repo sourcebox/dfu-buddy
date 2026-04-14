@@ -334,7 +334,31 @@ fn verify_device(
 
     match &file.content {
         dfufile::Content::Plain => {
-            // TODO.
+            let content_size = file.size()? - dfufile::SUFFIX_LENGTH as u64;
+            let transfer_size = (device.info.dfu_transfer_size as u64).min(content_size) as u16;
+            let num_blocks = (content_size / transfer_size as u64 + 1) as u16;
+
+            for block_no in 0..num_blocks {
+                let chunk_size = transfer_size
+                    .min((content_size - block_no as u64 * transfer_size as u64) as u16);
+
+                device.wait_for_upload_idle()?;
+                let mut device_data = vec![0; chunk_size as usize];
+                device.upload_request(block_no, &mut device_data)?;
+
+                let mut file_data = vec![0; chunk_size as usize];
+                let file_pos = block_no as u64 * transfer_size as u64;
+                file.read_raw_at(file_pos, &mut file_data)?;
+
+                if device_data != file_data {
+                    return Err(anyhow!(Error::VerificationFailedBlock(block_no as u32)));
+                }
+
+                let progress = (block_no as f32) / ((num_blocks - 1) as f32);
+                event_sender
+                    .send(AppEvent::DeviceVerifyProgress(progress))
+                    .ok();
+            }
         }
         dfufile::Content::Dfuse(content) => {
             let num_images = content.images.len();
@@ -397,7 +421,9 @@ fn verify_device(
                             )?;
 
                             if device_data != file_data {
-                                return Err(anyhow!(Error::VerificationFailed(read_address)));
+                                return Err(anyhow!(Error::VerificationFailedAddress(
+                                    read_address
+                                )));
                             }
 
                             let progress = (block_no as f32) / (num_blocks as f32)
@@ -437,8 +463,11 @@ pub enum Error {
     /// Memory region not found for an address range
     MemoryRegionNotFound(u32, u32),
 
-    /// Verification error
-    VerificationFailed(u32),
+    /// Verification failed at specific address.
+    VerificationFailedAddress(u32),
+
+    /// Verification failed at specific block.
+    VerificationFailedBlock(u32),
 }
 
 impl std::error::Error for Error {}
@@ -454,8 +483,10 @@ impl std::fmt::Display for Error {
                 Self::MemoryRegionNotFound(start_address, end_address) => format!(
                     "No memory region found with address 0x{start_address:08X}..0x{end_address:08X}"
                 ),
-                Self::VerificationFailed(address) =>
+                Self::VerificationFailedAddress(address) =>
                     format!("Verification failed at address 0x{address:08X}."),
+                Self::VerificationFailedBlock(block) =>
+                    format!("Verification failed at block {block}."),
             }
         )
     }
