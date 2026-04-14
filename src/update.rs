@@ -166,7 +166,37 @@ fn program_device(
 
     match &file.content {
         dfufile::Content::Plain => {
-            return Err(anyhow!(Error::PlainDfuNotSupported));
+            let content_size = file.size()? - dfufile::SUFFIX_LENGTH as u64;
+            let transfer_size = (device.info.dfu_transfer_size as u64).min(content_size) as u16;
+            let num_blocks = (content_size / transfer_size as u64 + 1) as u16;
+
+            for block_no in 0..num_blocks {
+                let chunk_size = transfer_size
+                    .min((content_size - block_no as u64 * transfer_size as u64) as u16);
+                let mut file_data = vec![0; chunk_size as usize];
+                let file_pos = block_no as u64 * transfer_size as u64;
+                file.read_raw_at(file_pos, &mut file_data)?;
+
+                log::debug!("Programming block {} with {} bytes.", block_no, chunk_size);
+
+                device.wait_for_download_idle()?;
+                device.download_request(block_no, &file_data)?;
+
+                let status = device.getstatus_request()?;
+                device.wait_for_status_response(status.bwPollTimeout as u64)?;
+
+                log::debug!("Block no {} written", block_no);
+
+                let progress = (block_no as f32) / ((num_blocks - 1) as f32);
+                event_sender
+                    .send(AppEvent::DeviceProgramProgress(progress))
+                    .ok();
+            }
+
+            // Send zero-length request to indicate completed transfer.
+            device.wait_for_download_idle()?;
+            device.download_request(0, &[])?;
+            device.getstatus_request()?;
         }
         dfufile::Content::Dfuse(content) => {
             let num_images = content.images.len();
