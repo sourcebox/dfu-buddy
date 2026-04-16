@@ -268,7 +268,11 @@ pub fn update_controls(
 }
 
 /// Show box with update progress bars
-pub fn update_progress(ui: &mut egui::Ui, update_state: &DeviceUpdateState) {
+pub fn update_progress(
+    ui: &mut egui::Ui,
+    update_state: &DeviceUpdateState,
+    device_info: Option<&dfudev::DeviceInfo>,
+) {
     ui.group(|ui| {
         ui.set_width(ui.available_width());
         ui.set_height(ui.available_height());
@@ -276,50 +280,71 @@ pub fn update_progress(ui: &mut egui::Ui, update_state: &DeviceUpdateState) {
             ui.disable();
         }
 
-        ui.vertical(|ui| {
-            egui::Grid::new("progress_bars")
-                .num_columns(2)
-                .spacing((20.0, 10.0))
-                .show(ui, |ui| {
-                    ui.label("Erase");
-                    ui.add(
-                        egui::ProgressBar::new(update_state.erase_progress)
-                            .show_percentage()
-                            .animate(
-                                update_state
-                                    .step
-                                    .as_ref()
-                                    .is_some_and(|step| *step == DeviceUpdateStep::Erase),
-                            ),
-                    );
-                    ui.end_row();
+        if let Some(device_info) = device_info {
+            ui.vertical(|ui| {
+                egui::Grid::new("progress_bars")
+                    .num_columns(2)
+                    .spacing((20.0, 10.0))
+                    .show(ui, |ui| {
+                        ui.label("Erase");
+                        if device_info.can_download() {
+                            ui.add(
+                                egui::ProgressBar::new(update_state.erase_progress)
+                                    .show_percentage()
+                                    .animate(
+                                        update_state
+                                            .step
+                                            .as_ref()
+                                            .is_some_and(|step| *step == DeviceUpdateStep::Erase),
+                                    ),
+                            );
+                        } else {
+                            ui.label("Not supported");
+                        }
+                        ui.end_row();
 
-                    ui.label("Program");
-                    ui.add(
-                        egui::ProgressBar::new(update_state.program_progress)
-                            .show_percentage()
-                            .animate(
-                                update_state
-                                    .step
-                                    .as_ref()
-                                    .is_some_and(|step| *step == DeviceUpdateStep::Program),
-                            ),
-                    );
-                    ui.end_row();
+                        ui.label("Program");
+                        if device_info.can_download() {
+                            ui.add(
+                                egui::ProgressBar::new(update_state.program_progress)
+                                    .show_percentage()
+                                    .animate(
+                                        update_state
+                                            .step
+                                            .as_ref()
+                                            .is_some_and(|step| *step == DeviceUpdateStep::Program),
+                                    ),
+                            );
+                        } else {
+                            ui.label("Not supported");
+                        }
+                        ui.end_row();
 
-                    ui.label("Verify");
-                    ui.add(
-                        egui::ProgressBar::new(update_state.verify_progress)
-                            .show_percentage()
-                            .animate(
-                                update_state
-                                    .step
-                                    .as_ref()
-                                    .is_some_and(|step| *step == DeviceUpdateStep::Verify),
-                            ),
-                    );
-                    ui.end_row();
-                })
-        });
+                        ui.label("Verify");
+                        if device_info.can_upload() {
+                            ui.add(
+                                egui::ProgressBar::new(update_state.verify_progress)
+                                    .show_percentage()
+                                    .animate(
+                                        update_state
+                                            .step
+                                            .as_ref()
+                                            .is_some_and(|step| *step == DeviceUpdateStep::Verify),
+                                    ),
+                            );
+                        } else {
+                            ui.label("Not supported");
+                        }
+                        ui.end_row();
+                    })
+            });
+        } else {
+            ui.centered_and_justified(|ui| {
+                ui.add(egui::Label::new(
+                    egui::RichText::new("Please select a device.")
+                        .color(ui.style().visuals.warn_fg_color),
+                ));
+            });
+        }
     });
 }

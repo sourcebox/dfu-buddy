@@ -396,7 +396,8 @@ impl eframe::App for App {
                 ui.set_height(100.0);
                 device::update_controls(ui, &mut self.device_update_state, &self.event_channel.0);
                 ui.add_space(10.0);
-                device::update_progress(ui, &self.device_update_state);
+                let device_info = self.get_selected_device().map(|device| &device.info);
+                device::update_progress(ui, &self.device_update_state, device_info);
             });
         });
 
