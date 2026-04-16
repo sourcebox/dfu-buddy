@@ -196,7 +196,7 @@ fn program_device(
 
             // Send zero-length request to indicate completed transfer.
             device.wait_for_download_idle()?;
-            device.download_request(0, &[])?;
+            device.download_request(num_blocks, &[])?;
             device.getstatus_request()?;
         }
         dfufile::Content::Dfuse(content) => {
