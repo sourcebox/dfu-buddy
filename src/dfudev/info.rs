@@ -1,6 +1,6 @@
 //! Additional device info based on parsing descriptors
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
 use super::{Device, DfuFunctionalDescriptor, Error, TIMEOUT};
 
@@ -33,6 +33,29 @@ impl std::fmt::Display for DeviceInfo {
             self.device_version,
             self.serial_number_string
         )
+    }
+}
+
+impl DeviceInfo {
+    /// Returns if the device is download-capable.
+    pub fn can_download(&self) -> bool {
+        (self.dfu_attributes & 0b1) != 0
+    }
+
+    /// Returns if the device is upload-capable.
+    pub fn can_upload(&self) -> bool {
+        ((self.dfu_attributes >> 1) & 0b1) != 0
+    }
+
+    /// Returns if the device is able to communicate via USB after manifestation phase.
+    pub fn is_manifestation_tolerant(&self) -> bool {
+        ((self.dfu_attributes >> 2) & 0b1) != 0
+    }
+
+    /// Returns if the device will perform a bus detach-attach sequence when it
+    /// receives a DFU_DETACH request.
+    pub fn will_detach(&self) -> bool {
+        ((self.dfu_attributes >> 3) & 0b1) != 0
     }
 }
 
