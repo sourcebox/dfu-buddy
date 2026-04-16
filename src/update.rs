@@ -53,7 +53,7 @@ fn erase_device(
 
     match &file.content {
         dfufile::Content::Plain => {
-            log::warn!("Plain DFU does not support separate erase. Skipped.");
+            log::info!("Plain DFU does not support separate erase. Skipped.");
             event_sender.send(AppEvent::DeviceEraseProgress(1.0)).ok();
         }
         dfufile::Content::Dfuse(content) => {
@@ -315,8 +315,12 @@ fn verify_device(
         .send(AppEvent::DeviceUpdateStep(DeviceUpdateStep::Verify))
         .ok();
 
-    // Find the device by its id and open it
+    // Find the device by its id, check for upload capability and open it.
     let mut device = dfudev::DfuDevice::find_by_id(device_id)?.unwrap();
+    if !device.info.can_upload() {
+        log::info!("Upload not supported. Verification skipped.");
+        return Ok(());
+    }
     device.open()?;
 
     // Make sure device is in idle state before operations start
