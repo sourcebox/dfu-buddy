@@ -169,12 +169,12 @@ fn program_device(
         dfufile::Content::Plain => {
             let content_size = file.size()? - dfufile::SUFFIX_LENGTH as u64;
             let transfer_size = (device.info.dfu_transfer_size as u64).min(content_size) as u16;
-            let num_blocks = (content_size / transfer_size as u64 + 1) as u16;
+            let num_blocks = ((content_size as i64 - 1) / transfer_size as i64 + 1) as u16;
 
             for block_no in 0..num_blocks {
-                let chunk_size = transfer_size
-                    .min((content_size - block_no as u64 * transfer_size as u64) as u16);
-                let mut file_data = vec![0; chunk_size as usize];
+                let chunk_size = (transfer_size as usize)
+                    .min((content_size - block_no as u64 * transfer_size as u64) as usize);
+                let mut file_data = vec![0; chunk_size];
                 let file_pos = block_no as u64 * transfer_size as u64;
                 file.read_raw_at(file_pos, &mut file_data)?;
 
@@ -188,7 +188,7 @@ fn program_device(
 
                 log::debug!("Block no {} written", block_no);
 
-                let progress = (block_no as f32) / ((num_blocks - 1) as f32);
+                let progress = ((block_no + 1) as f32) / (num_blocks as f32);
                 event_sender
                     .send(AppEvent::DeviceProgramProgress(progress))
                     .ok();
@@ -341,17 +341,17 @@ fn verify_device(
         dfufile::Content::Plain => {
             let content_size = file.size()? - dfufile::SUFFIX_LENGTH as u64;
             let transfer_size = (device.info.dfu_transfer_size as u64).min(content_size) as u16;
-            let num_blocks = (content_size / transfer_size as u64 + 1) as u16;
+            let num_blocks = ((content_size as i64 - 1) / transfer_size as i64 + 1) as u16;
 
             for block_no in 0..num_blocks {
-                let chunk_size = transfer_size
-                    .min((content_size - block_no as u64 * transfer_size as u64) as u16);
+                let chunk_size = (transfer_size as usize)
+                    .min((content_size - block_no as u64 * transfer_size as u64) as usize);
 
                 device.wait_for_upload_idle()?;
-                let mut device_data = vec![0; chunk_size as usize];
+                let mut device_data = vec![0; chunk_size];
                 device.upload_request(block_no, &mut device_data)?;
 
-                let mut file_data = vec![0; chunk_size as usize];
+                let mut file_data = vec![0; chunk_size];
                 let file_pos = block_no as u64 * transfer_size as u64;
                 file.read_raw_at(file_pos, &mut file_data)?;
 
@@ -359,7 +359,7 @@ fn verify_device(
                     return Err(anyhow!(Error::VerificationFailedBlock(block_no as u32)));
                 }
 
-                let progress = (block_no as f32) / ((num_blocks - 1) as f32);
+                let progress = ((block_no + 1) as f32) / (num_blocks as f32);
                 event_sender
                     .send(AppEvent::DeviceVerifyProgress(progress))
                     .ok();
