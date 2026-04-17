@@ -319,9 +319,6 @@ impl DfuDevice {
         let mut retries = 0;
 
         loop {
-            // Wait the time requested by the device in status response
-            std::thread::sleep(std::time::Duration::from_millis(timeout));
-
             // Status response must have state dfuDNLOAD_IDLE
             let status = self.getstatus_request();
             if let Ok(status) = status {
@@ -337,6 +334,9 @@ impl DfuDevice {
                 }
                 retries += 1;
             }
+
+            // Wait the time requested by the device in status response
+            std::thread::sleep(std::time::Duration::from_millis(timeout));
         }
     }
 }
