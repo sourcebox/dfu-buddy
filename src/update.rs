@@ -168,14 +168,14 @@ fn program_device(
     match &file.content {
         dfufile::Content::Plain => {
             let content_size = file.size()? - dfufile::SUFFIX_LENGTH as u64;
-            let transfer_size = (device.info.dfu_transfer_size as u64).min(content_size) as u16;
+            let transfer_size = (device.info.dfu_transfer_size as u64).min(content_size);
             let num_blocks = ((content_size as i64 - 1) / transfer_size as i64 + 1) as u16;
 
             for block_no in 0..num_blocks {
                 let chunk_size = (transfer_size as usize)
-                    .min((content_size - block_no as u64 * transfer_size as u64) as usize);
+                    .min((content_size - block_no as u64 * transfer_size) as usize);
                 let mut file_data = vec![0; chunk_size];
-                let file_pos = block_no as u64 * transfer_size as u64;
+                let file_pos = block_no as u64 * transfer_size;
                 file.read_raw_at(file_pos, &mut file_data)?;
 
                 log::debug!("Programming block {} with {} bytes.", block_no, chunk_size);
@@ -340,19 +340,19 @@ fn verify_device(
     match &file.content {
         dfufile::Content::Plain => {
             let content_size = file.size()? - dfufile::SUFFIX_LENGTH as u64;
-            let transfer_size = (device.info.dfu_transfer_size as u64).min(content_size) as u16;
+            let transfer_size = (device.info.dfu_transfer_size as u64).min(content_size);
             let num_blocks = ((content_size as i64 - 1) / transfer_size as i64 + 1) as u16;
 
             for block_no in 0..num_blocks {
                 let chunk_size = (transfer_size as usize)
-                    .min((content_size - block_no as u64 * transfer_size as u64) as usize);
+                    .min((content_size - block_no as u64 * transfer_size) as usize);
 
                 device.wait_for_upload_idle()?;
                 let mut device_data = vec![0; chunk_size];
                 device.upload_request(block_no, &mut device_data)?;
 
                 let mut file_data = vec![0; chunk_size];
-                let file_pos = block_no as u64 * transfer_size as u64;
+                let file_pos = block_no as u64 * transfer_size;
                 file.read_raw_at(file_pos, &mut file_data)?;
 
                 if device_data != file_data {
