@@ -312,7 +312,7 @@ impl eframe::App for App {
         }
 
         // Top panel with menu
-        egui::Panel::top("top_panel").show_inside(ui, |ui| {
+        egui::Panel::top("top_panel").show(ui, |ui| {
             ui.add_space(5.0);
             egui::MenuBar::new().ui(ui, |ui| {
                 egui::widgets::global_theme_preference_switch(ui);
@@ -330,7 +330,7 @@ impl eframe::App for App {
         });
 
         // Bottom panel with app version
-        egui::Panel::bottom("bottom_panel").show_inside(ui, |ui| {
+        egui::Panel::bottom("bottom_panel").show(ui, |ui| {
             ui.add_space(5.0);
             ui.horizontal(|ui| {
                 ui.label(format!("v{}", &env!("CARGO_PKG_VERSION")));
@@ -342,7 +342,7 @@ impl eframe::App for App {
             ui.add_space(0.5);
         });
 
-        egui::CentralPanel::default().show_inside(ui, |ui| {
+        egui::CentralPanel::default().show(ui, |ui| {
             ui.scope(|ui| {
                 if self.device_update_state.running {
                     ui.disable();
