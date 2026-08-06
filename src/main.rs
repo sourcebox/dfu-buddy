@@ -423,13 +423,11 @@ impl eframe::App for App {
             if !ui.ctx().input(|i| i.raw.dropped_files.is_empty()) {
                 let dropped_files = ui.ctx().input(|i| i.raw.dropped_files.clone());
                 for file in &dropped_files {
-                    if let Some(path) = &file.path {
-                        self.event_channel
-                            .0
-                            .send(AppEvent::OpenFile(path.clone()))
-                            .ok();
-                        break;
-                    }
+                    self.event_channel
+                        .0
+                        .send(AppEvent::OpenFile(file.path().to_path_buf()))
+                        .ok();
+                    break;
                 }
             }
         }

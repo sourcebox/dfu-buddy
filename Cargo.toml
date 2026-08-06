@@ -4,7 +4,7 @@ version = "0.3.0"
 authors = ["Oliver Rockstedt <info@sourcebox.de>"]
 license = "MIT"
 edition = "2024"
-rust-version = "1.92"
+rust-version = "1.95"
 description = "DFU flash utility with GUI"
 homepage = "https://github.com/sourcebox/dfu-buddy"
 repository = "https://github.com/sourcebox/dfu-buddy"
@@ -25,7 +25,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 simple_logger = { version = "5.2.0" }
 
 [dependencies.eframe]
-version = "0.35.0"
+version = "0.36.0"
 features = ["persistence"]
 
 [features]
