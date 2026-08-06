@@ -15,7 +15,7 @@ dfufile = "0.3.0"
 dirs = "6.0.0"
 futures = "0.3.33"
 log = { version = "0.4.33", features = [
-    "max_level_info",
+    "max_level_debug",
     "release_max_level_info",
 ] }
 regex = "1.13.1"

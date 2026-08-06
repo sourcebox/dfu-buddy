@@ -28,7 +28,8 @@ const FPS_LIMIT: u32 = 25;
 /// Starts the application
 fn main() {
     SimpleLogger::new()
-        .with_level(log::LevelFilter::Debug)
+        .with_level(log::LevelFilter::Info)
+        .with_module_level(env!("CARGO_CRATE_NAME"), log::LevelFilter::Debug)
         .init()
         .unwrap();
 
