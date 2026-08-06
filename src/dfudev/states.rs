@@ -4,7 +4,7 @@
 
 #![allow(dead_code)]
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
 use super::Error;
 
