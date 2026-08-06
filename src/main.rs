@@ -333,7 +333,7 @@ impl eframe::App for App {
         egui::Panel::bottom("bottom_panel").show(ui, |ui| {
             ui.add_space(5.0);
             ui.horizontal(|ui| {
-                ui.label(format!("v{}", &env!("CARGO_PKG_VERSION")));
+                ui.label(format!("v{}", env!("CARGO_PKG_VERSION")));
                 egui::warn_if_debug_build(ui);
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     ui.hyperlink_to("Project homepage", env!("CARGO_PKG_HOMEPAGE"));
@@ -422,12 +422,11 @@ impl eframe::App for App {
 
             if !ui.ctx().input(|i| i.raw.dropped_files.is_empty()) {
                 let dropped_files = ui.ctx().input(|i| i.raw.dropped_files.clone());
-                for file in &dropped_files {
+                if let Some(file) = dropped_files.into_iter().next() {
                     self.event_channel
                         .0
                         .send(AppEvent::OpenFile(file.path().to_path_buf()))
                         .ok();
-                    break;
                 }
             }
         }
@@ -561,7 +560,7 @@ impl App {
             Ok(devices) => {
                 if let Some(devices) = &devices {
                     for device in devices {
-                        log::debug!("Found DFU device {}", &device.info);
+                        log::debug!("Found DFU device {}", device.info);
                     }
                     if self.device_id.is_none() {
                         // Select the first device found

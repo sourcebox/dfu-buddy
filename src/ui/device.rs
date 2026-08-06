@@ -17,7 +17,7 @@ pub fn selection(
         for (index, device) in devices.as_ref().unwrap().iter().enumerate() {
             device_list.push(format!(
                 "{} | {}",
-                &device.info.manufacturer_string, &device.info.product_string
+                device.info.manufacturer_string, device.info.product_string
             ));
 
             if selected_device.is_some() && selected_device.unwrap().id == device.id {
