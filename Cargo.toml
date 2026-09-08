@@ -23,10 +23,7 @@ rfd = "0.17.2"
 rusb = { version = "0.9.4" }
 serde = { version = "1.0.229", features = ["derive"] }
 simple_logger = { version = "5.2.0" }
-
-[dependencies.eframe]
-version = "0.36.1"
-features = ["persistence"]
+eframe = { version = "0.36.2", features = ["persistence"] }
 
 [features]
 default = ["libusb-vendored"]
