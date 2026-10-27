@@ -40,7 +40,7 @@ impl ShowDialog for ErrorDialog {
     fn show(&mut self, ctx: &Context) -> (bool, Option<AppEvent>) {
         let mut event = None;
 
-        let modal = Modal::new(Id::new("Error Dialog")).show(ctx, |ui| {
+        let modal = Modal::new(Id::unique("Error Dialog")).show(ctx, |ui| {
             ui.set_width(400.0);
 
             ui.heading(&self.title);
