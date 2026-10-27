@@ -22,6 +22,7 @@ DFU Buddy is still work in progress. Support by other users, mainly in form of t
   - STM32G474VC
   - STM32F405RG
   - STM32F303VC (STM32F3DISCOVERY)
+  - STM32H743VG
 
 ## Usage
 
