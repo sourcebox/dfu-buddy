@@ -316,7 +316,6 @@ impl eframe::App for App {
         egui::Panel::top("top_panel").show(ui, |ui| {
             ui.add_space(5.0);
             egui::MenuBar::new().ui(ui, |ui| {
-                egui::widgets::global_theme_preference_buttons(ui);
                 egui::containers::menu::MenuButton::new("File").ui(ui, |ui| {
                     if ui.button("Open...").clicked() {
                         self.event_channel.0.send(AppEvent::OpenFileDialog).ok();
@@ -325,6 +324,9 @@ impl eframe::App for App {
                     if ui.button("Quit").clicked() {
                         ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
                     }
+                });
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    egui::widgets::global_theme_preference_buttons(ui);
                 });
             });
             ui.add_space(0.1);
