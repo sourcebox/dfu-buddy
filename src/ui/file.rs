@@ -65,7 +65,6 @@ pub fn common_info(
             Some(dfu_file) => {
                 ui.vertical(|ui| {
                     ui.heading("Metadata");
-                    ui.add_space(5.0);
                     egui::Grid::new("file_info").show(ui, |ui| {
                         let vendor_id = dfu_file.suffix.idVendor;
                         let product_id = dfu_file.suffix.idProduct;
@@ -201,7 +200,6 @@ pub fn content_info(
                 dfufile::Content::Dfuse(content) => {
                     ui.vertical(|ui| {
                         ui.heading("Images");
-                        ui.add_space(5.0);
                         egui::Grid::new("file_content_info")
                             .num_columns(5)
                             .show(ui, |ui| {

@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Moved theme switcher to the upper right
+- Moved theme switcher to the upper right.
+- Minor layout updates.
 
 ## [0.3.0] - 2026-05-04
 

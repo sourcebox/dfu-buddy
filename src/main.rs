@@ -18,7 +18,7 @@ use ui::dialog::{ErrorDialog, ShowDialog};
 use ui::{device, file};
 
 /// Size of the native application window
-const WINDOW_SIZE: egui::Vec2 = egui::vec2(850.0, 605.0);
+const WINDOW_SIZE: egui::Vec2 = egui::vec2(850.0, 620.0);
 
 /// Max number of frames per second
 const FPS_LIMIT: u32 = 25;
@@ -378,7 +378,7 @@ impl eframe::App for App {
                 ui.add_space(5.0);
 
                 ui.horizontal(|ui| {
-                    ui.set_height(160.0);
+                    ui.set_height(165.0);
 
                     file::common_info(
                         ui,
