@@ -85,7 +85,6 @@ pub fn common_info(ui: &mut egui::Ui, device_info: Option<&dfudev::DeviceInfo>) 
             Some(device_info) => {
                 ui.vertical(|ui| {
                     ui.heading("ID");
-                    ui.add_space(5.0);
                     egui::Grid::new("device_info").show(ui, |ui| {
                         ui.label("Vendor ID:");
                         ui.label(format!("0x{:04X}", device_info.vendor_id));
@@ -136,9 +135,6 @@ pub fn memory_info(ui: &mut egui::Ui, device_info: Option<&dfudev::DeviceInfo>) 
             Some(device_info) => {
                 ui.vertical(|ui| {
                     ui.heading("Memory Segments");
-
-                    ui.add_space(5.0);
-
                     egui::containers::ScrollArea::vertical().show(ui, |ui| {
                         ui.set_width(ui.available_width());
                         egui::Grid::new("segments_info").show(ui, |ui| {
