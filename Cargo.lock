@@ -745,7 +745,7 @@ checksum = "9e9de72ce2ad1f90dc62fa25f0f430ef85eb4b0d8fa0be4f30373bc40a21d28e"
 
 [[package]]
 name = "dfu-buddy"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "dfufile",
