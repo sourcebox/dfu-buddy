@@ -14,7 +14,7 @@ anyhow = "1.0.104"
 dfufile = "0.3.0"
 dirs = "7.0.0"
 futures = "0.3.34"
-log = { version = "0.4.34", features = [
+log = { version = "0.4.35", features = [
     "max_level_debug",
     "release_max_level_info",
 ] }
