@@ -24,7 +24,7 @@ rusb = { version = "0.9.4" }
 serde = { version = "1.0.229", features = ["derive"] }
 simple_logger = { version = "5.2.0" }
 eframe = { version = "0.37.0", features = ["persistence"] }
-egui = { version = "0.37.0", features = ["persistence"] }
+egui = { version = "0.37.0", features = ["persistence", "monochrome_emoji_fonts"] }
 
 [features]
 default = ["libusb-vendored"]
