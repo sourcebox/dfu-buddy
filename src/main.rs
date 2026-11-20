@@ -7,10 +7,13 @@ mod update;
 
 use std::time::Duration;
 
-use eframe::egui::{
-    self, FontFamily, FontId, Margin,
+use egui::{
+    self, Align, Align2, CentralPanel, Color32, Context, FontFamily, FontId, Id, LayerId, Layout,
+    Margin, MenuBar, Order, Panel, Ui, Vec2, ViewportBuilder, ViewportCommand,
+    global_theme_preference_buttons,
+    menu::MenuButton,
     style::{Spacing, TextStyle},
-    vec2,
+    vec2, warn_if_debug_build,
 };
 use simple_logger::SimpleLogger;
 
@@ -18,7 +21,7 @@ use ui::dialog::{ErrorDialog, ShowDialog};
 use ui::{device, file};
 
 /// Size of the native application window
-const WINDOW_SIZE: egui::Vec2 = egui::vec2(850.0, 630.0);
+const WINDOW_SIZE: Vec2 = vec2(850.0, 630.0);
 
 /// Max number of frames per second
 const FPS_LIMIT: u32 = 25;
@@ -34,7 +37,7 @@ fn main() {
         .unwrap();
 
     let native_options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
+        viewport: ViewportBuilder::default()
             .with_inner_size(WINDOW_SIZE)
             .with_min_inner_size(WINDOW_SIZE)
             .with_max_inner_size(WINDOW_SIZE)
@@ -281,7 +284,7 @@ impl eframe::App for App {
         eframe::set_value(storage, eframe::APP_KEY, self);
     }
 
-    fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    fn logic(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
         while let Ok(event) = self.event_channel.1.try_recv() {
             self.process_event(event, ctx);
         }
@@ -290,11 +293,11 @@ impl eframe::App for App {
         ctx.request_repaint_after(Duration::from_millis(1000 / FPS_LIMIT as u64));
     }
 
-    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut Ui, _frame: &mut eframe::Frame) {
         let zoom_factor = ui.ctx().zoom_factor();
         if self.zoom_factor != zoom_factor {
             ui.ctx()
-                .send_viewport_cmd(egui::ViewportCommand::InnerSize(WINDOW_SIZE * zoom_factor));
+                .send_viewport_cmd(ViewportCommand::InnerSize(WINDOW_SIZE * zoom_factor));
             self.zoom_factor = zoom_factor;
         }
 
@@ -313,39 +316,39 @@ impl eframe::App for App {
         }
 
         // Top panel with menu
-        egui::Panel::top("top_panel").show(ui, |ui| {
+        Panel::top("top_panel").show(ui, |ui| {
             ui.add_space(5.0);
-            egui::MenuBar::new().ui(ui, |ui| {
-                egui::containers::menu::MenuButton::new("File").ui(ui, |ui| {
+            MenuBar::new().ui(ui, |ui| {
+                MenuButton::new("File").ui(ui, |ui| {
                     if ui.button("Open...").clicked() {
                         self.event_channel.0.send(AppEvent::OpenFileDialog).ok();
                         ui.close();
                     }
                     if ui.button("Quit").clicked() {
-                        ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
+                        ui.ctx().send_viewport_cmd(ViewportCommand::Close);
                     }
                 });
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    egui::widgets::global_theme_preference_buttons(ui);
+                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                    global_theme_preference_buttons(ui);
                 });
             });
             ui.add_space(0.1);
         });
 
         // Bottom panel with app version
-        egui::Panel::bottom("bottom_panel").show(ui, |ui| {
+        Panel::bottom("bottom_panel").show(ui, |ui| {
             ui.add_space(5.0);
             ui.horizontal(|ui| {
                 ui.label(format!("v{}", env!("CARGO_PKG_VERSION")));
-                egui::warn_if_debug_build(ui);
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                warn_if_debug_build(ui);
+                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     ui.hyperlink_to("Project homepage", env!("CARGO_PKG_HOMEPAGE"));
                 });
             });
             ui.add_space(0.5);
         });
 
-        egui::CentralPanel::default().show(ui, |ui| {
+        CentralPanel::default().show(ui, |ui| {
             ui.scope(|ui| {
                 if self.device_update_state.running {
                     ui.disable();
@@ -407,18 +410,18 @@ impl eframe::App for App {
         // File drag-and-drop
         if !self.device_update_state.running {
             if !ui.ctx().input(|i| i.raw.hovered_files.is_empty()) {
-                let painter = ui.ctx().layer_painter(egui::LayerId::new(
-                    egui::Order::Foreground,
-                    egui::Id::unique("file_drop_target"),
+                let painter = ui.ctx().layer_painter(LayerId::new(
+                    Order::Foreground,
+                    Id::unique("file_drop_target"),
                 ));
 
                 let content_rect = ui.ctx().input(|i| i.content_rect());
-                painter.rect_filled(content_rect, 0.0, egui::Color32::from_black_alpha(192));
+                painter.rect_filled(content_rect, 0.0, Color32::from_black_alpha(192));
                 painter.text(
                     content_rect.center(),
-                    egui::Align2::CENTER_CENTER,
+                    Align2::CENTER_CENTER,
                     "Drop DFU file top open.",
-                    egui::FontId::new(16.0, egui::FontFamily::Proportional),
+                    FontId::new(16.0, FontFamily::Proportional),
                     ui.ctx().global_style().visuals.warn_fg_color,
                 );
             }
@@ -465,10 +468,10 @@ impl App {
     }
 
     /// Processes an event.
-    fn process_event(&mut self, event: AppEvent, ctx: &egui::Context) {
+    fn process_event(&mut self, event: AppEvent, ctx: &Context) {
         match event {
             AppEvent::Init => {
-                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(WINDOW_SIZE));
+                ctx.send_viewport_cmd(ViewportCommand::InnerSize(WINDOW_SIZE));
                 self.scan_devices();
             }
             AppEvent::RescanDevices => {

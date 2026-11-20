@@ -1,11 +1,12 @@
 //! UI elements showing device-related information
 
+use egui::{Button, Color32, ComboBox, Grid, Label, ProgressBar, RichText, ScrollArea, Ui};
+
 use crate::{AppEvent, DeviceUpdateState, DeviceUpdateStep, dfudev};
-use eframe::egui;
 
 /// Show combobox with devices
 pub fn selection(
-    ui: &mut egui::Ui,
+    ui: &mut Ui,
     devices: &Option<Vec<dfudev::DfuDevice>>,
     selected_device: &Option<&dfudev::DfuDevice>,
     event_sender: &std::sync::mpsc::Sender<AppEvent>,
@@ -39,7 +40,7 @@ pub fn selection(
                 ui.disable();
             }
 
-            let combo_box = egui::ComboBox::from_id_salt("device_list")
+            let combo_box = ComboBox::from_id_salt("device_list")
                 .width(ui.available_width() - 100.0)
                 .show_index(ui, &mut device_index, device_list.len(), |i| {
                     if device_count > 0 {
@@ -76,7 +77,7 @@ pub fn selection(
 }
 
 /// Show box with common device information
-pub fn common_info(ui: &mut egui::Ui, device_info: Option<&dfudev::DeviceInfo>) {
+pub fn common_info(ui: &mut Ui, device_info: Option<&dfudev::DeviceInfo>) {
     ui.group(|ui| {
         ui.set_width(ui.available_width() / 3.0);
         ui.set_height(ui.available_height());
@@ -85,7 +86,7 @@ pub fn common_info(ui: &mut egui::Ui, device_info: Option<&dfudev::DeviceInfo>) 
             Some(device_info) => {
                 ui.vertical(|ui| {
                     ui.heading("ID");
-                    egui::Grid::new("device_info").show(ui, |ui| {
+                    Grid::new("device_info").show(ui, |ui| {
                         ui.label("Vendor ID:");
                         ui.label(format!("0x{:04X}", device_info.vendor_id));
                         ui.end_row();
@@ -126,7 +127,7 @@ pub fn common_info(ui: &mut egui::Ui, device_info: Option<&dfudev::DeviceInfo>) 
 }
 
 /// Show box with target information
-pub fn memory_info(ui: &mut egui::Ui, device_info: Option<&dfudev::DeviceInfo>) {
+pub fn memory_info(ui: &mut Ui, device_info: Option<&dfudev::DeviceInfo>) {
     ui.group(|ui| {
         ui.set_width(ui.available_width());
         ui.set_height(ui.available_height());
@@ -135,9 +136,9 @@ pub fn memory_info(ui: &mut egui::Ui, device_info: Option<&dfudev::DeviceInfo>) 
             Some(device_info) => {
                 ui.vertical(|ui| {
                     ui.heading("Memory Segments");
-                    egui::containers::ScrollArea::vertical().show(ui, |ui| {
+                    ScrollArea::vertical().show(ui, |ui| {
                         ui.set_width(ui.available_width());
-                        egui::Grid::new("segments_info").show(ui, |ui| {
+                        Grid::new("segments_info").show(ui, |ui| {
                             ui.label("ID");
                             ui.label("Name");
                             ui.end_row();
@@ -162,7 +163,7 @@ pub fn memory_info(ui: &mut egui::Ui, device_info: Option<&dfudev::DeviceInfo>) 
 
 /// Show update button and additional messages
 pub fn update_controls(
-    ui: &mut egui::Ui,
+    ui: &mut Ui,
     update_state: &mut DeviceUpdateState,
     event_sender: &std::sync::mpsc::Sender<AppEvent>,
 ) {
@@ -173,19 +174,17 @@ pub fn update_controls(
         if update_state.error.is_some() {
             ui.vertical_centered(|ui| {
                 ui.add_space(10.0);
-                ui.add(egui::Label::new(
-                    egui::RichText::new("Error:").color(ui.style().visuals.error_fg_color),
+                ui.add(Label::new(
+                    RichText::new("Error:").color(ui.style().visuals.error_fg_color),
                 ));
-                ui.add(egui::Label::new(
-                    egui::RichText::new(update_state.error.as_ref().unwrap())
+                ui.add(Label::new(
+                    RichText::new(update_state.error.as_ref().unwrap())
                         .color(ui.style().visuals.error_fg_color),
                 ));
                 ui.add_space(10.0);
 
-                let continue_button = ui.add(
-                    egui::widgets::Button::new("Continue")
-                        .fill(ui.style().visuals.selection.bg_fill),
-                );
+                let continue_button =
+                    ui.add(Button::new("Continue").fill(ui.style().visuals.selection.bg_fill));
 
                 if continue_button.clicked() {
                     update_state.error = None;
@@ -198,16 +197,13 @@ pub fn update_controls(
         } else if update_state.finished {
             ui.vertical_centered(|ui| {
                 ui.add_space(10.0);
-                ui.add(egui::Label::new(
-                    egui::RichText::new("Update finished successfully.")
-                        .color(egui::Color32::GREEN),
+                ui.add(Label::new(
+                    RichText::new("Update finished successfully.").color(Color32::GREEN),
                 ));
                 ui.add_space(10.0);
 
-                let continue_button = ui.add(
-                    egui::widgets::Button::new("Continue")
-                        .fill(ui.style().visuals.selection.bg_fill),
-                );
+                let continue_button =
+                    ui.add(Button::new("Continue").fill(ui.style().visuals.selection.bg_fill));
 
                 if continue_button.clicked() {
                     *update_state = DeviceUpdateState::default();
@@ -217,8 +213,8 @@ pub fn update_controls(
             if update_state.preflight_checks_passed {
                 ui.vertical_centered(|ui| {
                     ui.add_space(5.0);
-                    ui.add(egui::Label::new(
-                        egui::RichText::new("Warning! All data on device will be erased!")
+                    ui.add(Label::new(
+                        RichText::new("Warning! All data on device will be erased!")
                             .color(ui.style().visuals.warn_fg_color),
                     ));
                     ui.add_space(10.0);
@@ -232,8 +228,7 @@ pub fn update_controls(
                             ui.disable();
                         }
                         let update_button = ui.add(
-                            egui::widgets::Button::new("Start update")
-                                .fill(ui.style().visuals.selection.bg_fill),
+                            Button::new("Start update").fill(ui.style().visuals.selection.bg_fill),
                         );
 
                         if update_button.clicked() {
@@ -244,8 +239,8 @@ pub fn update_controls(
                 });
             } else {
                 ui.centered_and_justified(|ui| {
-                    ui.add(egui::Label::new(
-                        egui::RichText::new(
+                    ui.add(Label::new(
+                        RichText::new(
                             "Some requirements are not met.\nPlease check your settings.",
                         )
                         .color(ui.style().visuals.error_fg_color),
@@ -254,8 +249,8 @@ pub fn update_controls(
             }
         } else {
             ui.centered_and_justified(|ui| {
-                ui.add(egui::Label::new(
-                    egui::RichText::new("Please select a device and open a file.")
+                ui.add(Label::new(
+                    RichText::new("Please select a device and open a file.")
                         .color(ui.style().visuals.warn_fg_color),
                 ));
             });
@@ -265,7 +260,7 @@ pub fn update_controls(
 
 /// Show box with update progress bars
 pub fn update_progress(
-    ui: &mut egui::Ui,
+    ui: &mut Ui,
     update_state: &DeviceUpdateState,
     device_info: Option<&dfudev::DeviceInfo>,
 ) {
@@ -278,14 +273,14 @@ pub fn update_progress(
 
         if let Some(device_info) = device_info {
             ui.vertical(|ui| {
-                egui::Grid::new("progress_bars")
+                Grid::new("progress_bars")
                     .num_columns(2)
                     .spacing((20.0, 10.0))
                     .show(ui, |ui| {
                         ui.label("Erase");
                         if device_info.can_download() {
                             ui.add(
-                                egui::ProgressBar::new(update_state.erase_progress)
+                                ProgressBar::new(update_state.erase_progress)
                                     .show_percentage()
                                     .animate(
                                         update_state
@@ -302,7 +297,7 @@ pub fn update_progress(
                         ui.label("Program");
                         if device_info.can_download() {
                             ui.add(
-                                egui::ProgressBar::new(update_state.program_progress)
+                                ProgressBar::new(update_state.program_progress)
                                     .show_percentage()
                                     .animate(
                                         update_state
@@ -319,7 +314,7 @@ pub fn update_progress(
                         ui.label("Verify");
                         if device_info.can_upload() {
                             ui.add(
-                                egui::ProgressBar::new(update_state.verify_progress)
+                                ProgressBar::new(update_state.verify_progress)
                                     .show_percentage()
                                     .animate(
                                         update_state
@@ -336,8 +331,8 @@ pub fn update_progress(
             });
         } else {
             ui.centered_and_justified(|ui| {
-                ui.add(egui::Label::new(
-                    egui::RichText::new("Please select a device.")
+                ui.add(Label::new(
+                    RichText::new("Please select a device.")
                         .color(ui.style().visuals.warn_fg_color),
                 ));
             });

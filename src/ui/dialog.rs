@@ -1,7 +1,6 @@
 //! Modal dialogs.
 
-use eframe::egui;
-use egui::{Context, Id, Modal};
+use egui::{Context, Id, Modal, Sides};
 
 use crate::AppEvent;
 
@@ -55,7 +54,7 @@ impl ShowDialog for ErrorDialog {
             ui.separator();
             ui.add_space(10.0);
 
-            egui::Sides::new().show(
+            Sides::new().show(
                 ui,
                 |_ui| {},
                 |ui| {

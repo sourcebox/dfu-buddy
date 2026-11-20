@@ -751,6 +751,7 @@ dependencies = [
  "dfufile",
  "dirs",
  "eframe",
+ "egui",
  "futures",
  "log",
  "regex",

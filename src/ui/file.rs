@@ -1,12 +1,12 @@
 //! UI elements showing file-related information
 
-use eframe::egui;
+use egui::{Button, Color32, Grid, Label, RichText, Ui};
 
 use crate::{AppEvent, DfuFileChecks, dfudev};
 
 /// Show box with file selection
 pub fn selection(
-    ui: &mut egui::Ui,
+    ui: &mut Ui,
     selected_file: &Option<dfufile::DfuFile>,
     event_sender: &std::sync::mpsc::Sender<AppEvent>,
 ) {
@@ -34,8 +34,7 @@ pub fn selection(
             }
         });
 
-        let open_button = ui
-            .add(egui::widgets::Button::new("Open...").fill(ui.style().visuals.selection.bg_fill));
+        let open_button = ui.add(Button::new("Open...").fill(ui.style().visuals.selection.bg_fill));
 
         if open_button.clicked() {
             event_sender.send(AppEvent::OpenFileDialog).ok();
@@ -49,7 +48,7 @@ pub fn selection(
 
 /// Show box with common file information
 pub fn common_info(
-    ui: &mut egui::Ui,
+    ui: &mut Ui,
     dfu_file: &Option<dfufile::DfuFile>,
     dfu_file_checks: &mut DfuFileChecks,
     device_active: bool,
@@ -65,22 +64,22 @@ pub fn common_info(
             Some(dfu_file) => {
                 ui.vertical(|ui| {
                     ui.heading("Metadata");
-                    egui::Grid::new("file_info").show(ui, |ui| {
+                    Grid::new("file_info").show(ui, |ui| {
                         let vendor_id = dfu_file.suffix.idVendor;
                         let product_id = dfu_file.suffix.idProduct;
 
                         ui.label("Format:");
                         let text_color = if device_active {
                             if dfu_file_checks.dfu_version_valid {
-                                egui::Color32::GREEN
+                                Color32::GREEN
                             } else {
                                 ui.style().visuals.error_fg_color
                             }
                         } else {
-                            egui::Color32::LIGHT_GRAY
+                            Color32::LIGHT_GRAY
                         };
-                        let format_label = ui.add(egui::Label::new(
-                            egui::RichText::new(format!("{}", dfu_file.content)).color(text_color),
+                        let format_label = ui.add(Label::new(
+                            RichText::new(format!("{}", dfu_file.content)).color(text_color),
                         ));
                         if device_active && !dfu_file_checks.dfu_version_valid {
                             format_label
@@ -91,15 +90,15 @@ pub fn common_info(
                         ui.label("Vendor ID:");
                         let text_color = if device_active {
                             if dfu_file_checks.vendor_id_accepted {
-                                egui::Color32::GREEN
+                                Color32::GREEN
                             } else {
                                 ui.style().visuals.error_fg_color
                             }
                         } else {
-                            egui::Color32::LIGHT_GRAY
+                            Color32::LIGHT_GRAY
                         };
-                        let vendor_id_label = ui.add(egui::Label::new(
-                            egui::RichText::new(format!("0x{vendor_id:04X}")).color(text_color),
+                        let vendor_id_label = ui.add(Label::new(
+                            RichText::new(format!("0x{vendor_id:04X}")).color(text_color),
                         ));
                         if device_active && !dfu_file_checks.vendor_id_accepted {
                             vendor_id_label
@@ -117,15 +116,15 @@ pub fn common_info(
                         ui.label("Product ID:");
                         let text_color = if device_active {
                             if dfu_file_checks.product_id_accepted {
-                                egui::Color32::GREEN
+                                Color32::GREEN
                             } else {
                                 ui.style().visuals.error_fg_color
                             }
                         } else {
-                            egui::Color32::LIGHT_GRAY
+                            Color32::LIGHT_GRAY
                         };
-                        let product_id_label = ui.add(egui::Label::new(
-                            egui::RichText::new(format!("0x{product_id:04X}")).color(text_color),
+                        let product_id_label = ui.add(Label::new(
+                            RichText::new(format!("0x{product_id:04X}")).color(text_color),
                         ));
                         if device_active && !dfu_file_checks.product_id_accepted {
                             product_id_label
@@ -146,12 +145,12 @@ pub fn common_info(
 
                         ui.label("CRC:");
                         let text_color = if dfu_file_checks.crc_valid {
-                            egui::Color32::GREEN
+                            Color32::GREEN
                         } else {
                             ui.style().visuals.error_fg_color
                         };
-                        let crc_label = ui.add(egui::Label::new(
-                            egui::RichText::new(format!("0x{:08X}", dfu_file.suffix.dwCRC))
+                        let crc_label = ui.add(Label::new(
+                            RichText::new(format!("0x{:08X}", dfu_file.suffix.dwCRC))
                                 .color(text_color),
                         ));
                         if !dfu_file_checks.crc_valid {
@@ -182,7 +181,7 @@ pub fn common_info(
 
 /// Show box with file content information
 pub fn content_info(
-    ui: &mut egui::Ui,
+    ui: &mut Ui,
     dfu_file: &Option<dfufile::DfuFile>,
     device_info: Option<&dfudev::DeviceInfo>,
 ) {
@@ -200,7 +199,7 @@ pub fn content_info(
                 dfufile::Content::Dfuse(content) => {
                     ui.vertical(|ui| {
                         ui.heading("Images");
-                        egui::Grid::new("file_content_info")
+                        Grid::new("file_content_info")
                             .num_columns(5)
                             .show(ui, |ui| {
                                 ui.label("ID");
@@ -226,15 +225,14 @@ pub fn content_info(
                                         });
                                         if let Some(target) = target {
                                             ui.add(
-                                                egui::Label::new(
-                                                    egui::RichText::new(&target.1)
-                                                        .color(egui::Color32::GREEN),
+                                                Label::new(
+                                                    RichText::new(&target.1).color(Color32::GREEN),
                                                 )
                                                 .truncate(),
                                             );
                                         } else {
-                                            ui.add(egui::Label::new(
-                                                egui::RichText::new("Not found")
+                                            ui.add(Label::new(
+                                                RichText::new("Not found")
                                                     .color(ui.style().visuals.error_fg_color),
                                             ));
                                         }
