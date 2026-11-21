@@ -1,8 +1,11 @@
 //! UI elements showing file-related information
 
-use egui::{Button, Color32, Grid, Label, RichText, Ui};
+use egui::{Button, Color32, Grid, Label, RichText, Ui, vec2};
 
-use crate::{AppEvent, DfuFileChecks, dfudev};
+use crate::{
+    AppEvent, DfuFileChecks,
+    dfudev::{self, dfuse::MemorySegment},
+};
 
 /// Show box with file selection
 pub fn selection(
@@ -64,102 +67,106 @@ pub fn common_info(
             Some(dfu_file) => {
                 ui.vertical(|ui| {
                     ui.heading("Metadata");
-                    Grid::new("file_info").show(ui, |ui| {
-                        let vendor_id = dfu_file.suffix.idVendor;
-                        let product_id = dfu_file.suffix.idProduct;
+                    Grid::new("file_info")
+                        .spacing(vec2(20.0, 5.0))
+                        .show(ui, |ui| {
+                            let vendor_id = dfu_file.suffix.idVendor;
+                            let product_id = dfu_file.suffix.idProduct;
 
-                        ui.label("Format:");
-                        let text_color = if device_active {
-                            if dfu_file_checks.dfu_version_valid {
+                            ui.label("Format:");
+                            let text_color = if device_active {
+                                if dfu_file_checks.dfu_version_valid {
+                                    Color32::GREEN
+                                } else {
+                                    ui.style().visuals.error_fg_color
+                                }
+                            } else {
+                                Color32::LIGHT_GRAY
+                            };
+                            let format_label = ui.add(Label::new(
+                                RichText::new(format!("{}", dfu_file.content)).color(text_color),
+                            ));
+                            if device_active && !dfu_file_checks.dfu_version_valid {
+                                format_label
+                                    .on_hover_text("File format is not appropriate for the device");
+                            }
+                            ui.end_row();
+
+                            ui.label("Vendor ID:");
+                            let text_color = if device_active {
+                                if dfu_file_checks.vendor_id_accepted {
+                                    Color32::GREEN
+                                } else {
+                                    ui.style().visuals.error_fg_color
+                                }
+                            } else {
+                                Color32::LIGHT_GRAY
+                            };
+                            let vendor_id_label = ui.add(Label::new(
+                                RichText::new(format!("0x{vendor_id:04X}")).color(text_color),
+                            ));
+                            if device_active && !dfu_file_checks.vendor_id_accepted {
+                                vendor_id_label.on_hover_text(
+                                    "Vendor id does not match the one of the device",
+                                );
+                                if ui
+                                    .button("Approve")
+                                    .on_hover_text("Accept vendor id for this device")
+                                    .clicked()
+                                {
+                                    approve_vendor_id = true;
+                                }
+                            }
+                            ui.end_row();
+
+                            ui.label("Product ID:");
+                            let text_color = if device_active {
+                                if dfu_file_checks.product_id_accepted {
+                                    Color32::GREEN
+                                } else {
+                                    ui.style().visuals.error_fg_color
+                                }
+                            } else {
+                                Color32::LIGHT_GRAY
+                            };
+                            let product_id_label = ui.add(Label::new(
+                                RichText::new(format!("0x{product_id:04X}")).color(text_color),
+                            ));
+                            if device_active && !dfu_file_checks.product_id_accepted {
+                                product_id_label.on_hover_text(
+                                    "Product id does not match the one of the device",
+                                );
+                                if ui
+                                    .button("Approve")
+                                    .on_hover_text("Accept product id for this device")
+                                    .clicked()
+                                {
+                                    approve_product_id = true;
+                                }
+                            }
+                            ui.end_row();
+
+                            ui.label("Version:");
+                            ui.label(format!("0x{:04X}", dfu_file.suffix.bcdDevice));
+                            ui.end_row();
+
+                            ui.label("CRC:");
+                            let text_color = if dfu_file_checks.crc_valid {
                                 Color32::GREEN
                             } else {
                                 ui.style().visuals.error_fg_color
+                            };
+                            let crc_label = ui.add(Label::new(
+                                RichText::new(format!("0x{:08X}", dfu_file.suffix.dwCRC))
+                                    .color(text_color),
+                            ));
+                            if !dfu_file_checks.crc_valid {
+                                crc_label.on_hover_text(
+                                    "Calculated CRC does not match the value stored in the file",
+                                );
                             }
-                        } else {
-                            Color32::LIGHT_GRAY
-                        };
-                        let format_label = ui.add(Label::new(
-                            RichText::new(format!("{}", dfu_file.content)).color(text_color),
-                        ));
-                        if device_active && !dfu_file_checks.dfu_version_valid {
-                            format_label
-                                .on_hover_text("File format is not appropriate for the device");
-                        }
-                        ui.end_row();
-
-                        ui.label("Vendor ID:");
-                        let text_color = if device_active {
-                            if dfu_file_checks.vendor_id_accepted {
-                                Color32::GREEN
-                            } else {
-                                ui.style().visuals.error_fg_color
-                            }
-                        } else {
-                            Color32::LIGHT_GRAY
-                        };
-                        let vendor_id_label = ui.add(Label::new(
-                            RichText::new(format!("0x{vendor_id:04X}")).color(text_color),
-                        ));
-                        if device_active && !dfu_file_checks.vendor_id_accepted {
-                            vendor_id_label
-                                .on_hover_text("Vendor id does not match the one of the device");
-                            if ui
-                                .button("Approve")
-                                .on_hover_text("Accept vendor id for this device")
-                                .clicked()
-                            {
-                                approve_vendor_id = true;
-                            }
-                        }
-                        ui.end_row();
-
-                        ui.label("Product ID:");
-                        let text_color = if device_active {
-                            if dfu_file_checks.product_id_accepted {
-                                Color32::GREEN
-                            } else {
-                                ui.style().visuals.error_fg_color
-                            }
-                        } else {
-                            Color32::LIGHT_GRAY
-                        };
-                        let product_id_label = ui.add(Label::new(
-                            RichText::new(format!("0x{product_id:04X}")).color(text_color),
-                        ));
-                        if device_active && !dfu_file_checks.product_id_accepted {
-                            product_id_label
-                                .on_hover_text("Product id does not match the one of the device");
-                            if ui
-                                .button("Approve")
-                                .on_hover_text("Accept product id for this device")
-                                .clicked()
-                            {
-                                approve_product_id = true;
-                            }
-                        }
-                        ui.end_row();
-
-                        ui.label("Version:");
-                        ui.label(format!("0x{:04X}", dfu_file.suffix.bcdDevice));
-                        ui.end_row();
-
-                        ui.label("CRC:");
-                        let text_color = if dfu_file_checks.crc_valid {
-                            Color32::GREEN
-                        } else {
-                            ui.style().visuals.error_fg_color
-                        };
-                        let crc_label = ui.add(Label::new(
-                            RichText::new(format!("0x{:08X}", dfu_file.suffix.dwCRC))
-                                .color(text_color),
-                        ));
-                        if !dfu_file_checks.crc_valid {
-                            crc_label.on_hover_text(
-                                "Calculated CRC does not match the value stored in the file",
-                            );
-                        }
-                        ui.end_row();
-                    });
+                            ui.end_row();
+                        });
                 });
             }
             None => {
@@ -201,6 +208,7 @@ pub fn content_info(
                         ui.heading("Images");
                         Grid::new("file_content_info")
                             .num_columns(5)
+                            .spacing(vec2(20.0, 5.0))
                             .show(ui, |ui| {
                                 ui.label("ID");
                                 ui.label("Name");
@@ -223,13 +231,16 @@ pub fn content_info(
                                         let target = device_info.alt_settings.iter().find(|&alt| {
                                             alt.0 == image.target_prefix.bAlternateSetting
                                         });
-                                        if let Some(target) = target {
+                                        if let Some((_, desc)) = target {
+                                            let segment = MemorySegment::from_string_desc(desc);
                                             ui.add(
                                                 Label::new(
-                                                    RichText::new(&target.1).color(Color32::GREEN),
+                                                    RichText::new(segment.name)
+                                                        .color(Color32::GREEN),
                                                 )
                                                 .truncate(),
-                                            );
+                                            )
+                                            .on_hover_text(desc);
                                         } else {
                                             ui.add(Label::new(
                                                 RichText::new("Not found")

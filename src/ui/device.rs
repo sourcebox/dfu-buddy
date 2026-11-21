@@ -1,8 +1,11 @@
 //! UI elements showing device-related information
 
-use egui::{Button, Color32, ComboBox, Grid, Label, ProgressBar, RichText, ScrollArea, Ui};
+use egui::{Button, Color32, ComboBox, Grid, Label, ProgressBar, RichText, ScrollArea, Ui, vec2};
 
-use crate::{AppEvent, DeviceUpdateState, DeviceUpdateStep, dfudev};
+use crate::{
+    AppEvent, DeviceUpdateState, DeviceUpdateStep,
+    dfudev::{self, dfuse::MemorySegment},
+};
 
 /// Show combobox with devices
 pub fn selection(
@@ -86,35 +89,38 @@ pub fn common_info(ui: &mut Ui, device_info: Option<&dfudev::DeviceInfo>) {
             Some(device_info) => {
                 ui.vertical(|ui| {
                     ui.heading("ID");
-                    Grid::new("device_info").show(ui, |ui| {
-                        ui.label("Vendor ID:");
-                        ui.label(format!("0x{:04X}", device_info.vendor_id));
-                        ui.end_row();
+                    Grid::new("device_info")
+                        .num_columns(2)
+                        .spacing(vec2(20.0, 5.0))
+                        .show(ui, |ui| {
+                            ui.label("Vendor ID:");
+                            ui.label(format!("0x{:04X}", device_info.vendor_id));
+                            ui.end_row();
 
-                        ui.label("Product ID:");
-                        ui.label(format!("0x{:04X}", device_info.product_id));
-                        ui.end_row();
+                            ui.label("Product ID:");
+                            ui.label(format!("0x{:04X}", device_info.product_id));
+                            ui.end_row();
 
-                        ui.label("Device Version:");
-                        ui.label(device_info.device_version.to_owned());
-                        ui.end_row();
+                            ui.label("Device Version:");
+                            ui.label(device_info.device_version.to_owned());
+                            ui.end_row();
 
-                        ui.label("Serial No:");
-                        ui.label(device_info.serial_number_string.to_owned());
-                        ui.end_row();
+                            ui.label("Serial No:");
+                            ui.label(device_info.serial_number_string.to_owned());
+                            ui.end_row();
 
-                        ui.label("DFU Version:");
-                        let version_info = if device_info.dfu_version == 0x011A {
-                            "(DfuSe)"
-                        } else {
-                            ""
-                        };
-                        ui.label(format!(
-                            "0x{:04X} {}",
-                            device_info.dfu_version, version_info
-                        ));
-                        ui.end_row();
-                    });
+                            ui.label("DFU Version:");
+                            let version_info = if device_info.dfu_version == 0x011A {
+                                "(DfuSe)"
+                            } else {
+                                ""
+                            };
+                            ui.label(format!(
+                                "0x{:04X} {}",
+                                device_info.dfu_version, version_info
+                            ));
+                            ui.end_row();
+                        });
                 });
             }
             None => {
@@ -138,17 +144,44 @@ pub fn memory_info(ui: &mut Ui, device_info: Option<&dfudev::DeviceInfo>) {
                     ui.heading("Memory Segments");
                     ScrollArea::vertical().show(ui, |ui| {
                         ui.set_width(ui.available_width());
-                        Grid::new("segments_info").show(ui, |ui| {
-                            ui.label("ID");
-                            ui.label("Name");
-                            ui.end_row();
-
-                            for alt_setting in &device_info.alt_settings {
-                                ui.label(format!("{}", alt_setting.0));
-                                ui.label(alt_setting.1.to_owned());
+                        Grid::new("segments_info")
+                            .num_columns(5)
+                            .spacing(vec2(20.0, 5.0))
+                            .show(ui, |ui| {
+                                ui.label("ID");
+                                ui.label("Name");
+                                ui.label("Address");
+                                ui.label("Sectors");
+                                ui.label("Read");
+                                ui.label("Write");
+                                ui.label("Erase");
                                 ui.end_row();
-                            }
-                        });
+
+                                for (id, desc) in &device_info.alt_settings {
+                                    let segment = MemorySegment::from_string_desc(desc);
+                                    for region in segment.regions {
+                                        ui.label(format!("{id}"));
+                                        ui.label(&segment.name).on_hover_text(desc);
+                                        ui.label(format!("0x{:08X}", region.start_address));
+                                        let sector_size =
+                                            if region.sector_size.is_multiple_of(1024 * 1024) {
+                                                format!("{}M", region.sector_size / (1024 * 1024))
+                                            } else if region.sector_size.is_multiple_of(1024) {
+                                                format!("{}K", region.sector_size / 1024)
+                                            } else {
+                                                format!("{}", region.sector_size)
+                                            };
+                                        ui.label(format!(
+                                            "{} * {}",
+                                            region.sector_count, sector_size
+                                        ));
+                                        ui.label(if region.readable { "✓" } else { "×" });
+                                        ui.label(if region.writable { "✓" } else { "×" });
+                                        ui.label(if region.erasable { "✓" } else { "×" });
+                                        ui.end_row();
+                                    }
+                                }
+                            });
                     });
                 });
             }
